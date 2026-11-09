@@ -1,6 +1,10 @@
 import Navbar from "@/components/Navbar";
 import { FREE_QUOTA_HA } from "@/lib/quota";
 import Globe from "./Globe";
+import { PREVIEW_PARK, PREVIEW_PLOTS, PREVIEW_REGION } from "./preview-data";
+
+// The card quotes the real result for the preview's protected-area plot.
+const overlapPlot = PREVIEW_PLOTS.find((p) => p.wdpaStatus !== "compliant") ?? PREVIEW_PLOTS[0];
 
 const features = [
   { label: "Plot screening", icon: <path d="M4 18 L9 5 L20 8 L17 20 Z" /> },
@@ -59,11 +63,14 @@ export default function Hero({ authed, userName }: { authed: boolean; userName?:
           </div>
           <div className="absolute right-0 bottom-[6%] flex w-[min(290px,78%)] flex-col gap-2.5 rounded-xl border border-[#343A3F] bg-ink-mid px-4.5 py-4 shadow-[0_20px_40px_rgba(0,0,0,0.35)]">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-mono text-[12px] text-[#A9AFAB]">Plot B · Riau, ID</span>
+              <span className="font-mono text-[12px] text-[#A9AFAB]">
+                Plot {overlapPlot.id} · {PREVIEW_REGION}
+              </span>
               <span className="rounded-full bg-[#F2A65A] px-2.5 py-0.5 text-[12px] font-semibold text-[#2A1504]">Needs review</span>
             </div>
             <span className="text-[15px] leading-[1.45] text-[#F2F2EE]">
-              3.2 ha overlaps a protected area (IUCN II). No forest loss after 2020.
+              Overlaps {PREVIEW_PARK.name} (IUCN {PREVIEW_PARK.iucn}).{" "}
+              {overlapPlot.risk === "high" ? "Forest loss detected after 2020." : "No forest loss after 2020."}
             </span>
           </div>
         </div>

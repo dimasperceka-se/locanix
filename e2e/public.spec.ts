@@ -23,8 +23,23 @@ test("the free-analysis call to action leads to the upload page, which asks sign
   await page.getByRole("link", { name: "Analyze 10 ha free →" }).click();
   await expect(page).toHaveURL(/\/analyze$/);
   await expect(page.getByRole("heading", { level: 1, name: "Your EUDR compliance check, ready in minutes." })).toBeVisible();
-  await page.getByRole("button", { name: "Run compliance check" }).click();
+  await page.getByRole("link", { name: "Run compliance check" }).click();
   await expect(page).toHaveURL(/\/login\?next=(%2F|\/)analyze/);
+});
+
+test("the landing preview map zooms and toggles its layers", async ({ page }) => {
+  await page.goto("/");
+  const preview = page.getByRole("region", { name: "Product preview" });
+  await preview.scrollIntoViewIfNeeded();
+  await expect(preview.locator(".landing-preview-map canvas").first()).toBeVisible();
+  await expect(preview.getByText("Supplier plots — Pelalawan, Riau")).toBeVisible();
+  await expect(preview.getByText("Overlap · IUCN II")).toBeVisible();
+  await preview.getByRole("button", { name: "Zoom in" }).click();
+  await preview.getByRole("button", { name: "Zoom out" }).click();
+  await preview.getByLabel("Deforestation alerts (GLAD)").uncheck();
+  await expect(preview.getByText("GLAD alerts: UMD / Global Forest Watch", { exact: false })).toHaveCount(0);
+  await preview.getByLabel("Deforestation alerts (GLAD)").check();
+  await expect(preview.getByText("GLAD alerts: UMD / Global Forest Watch", { exact: false })).toBeVisible();
 });
 
 test("privacy page shows the published terms", async ({ page }) => {

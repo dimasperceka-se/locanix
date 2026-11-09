@@ -1,8 +1,12 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowRight, Check, Leaf, Lock, Shapes } from "lucide-react";
+
+const runClass =
+  "inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-semibold text-white no-underline transition-colors hover:bg-ink-mid disabled:cursor-not-allowed disabled:opacity-50";
 import { eudrAnalyses, type AnalysisKey } from "@/lib/data";
 import { usePlotStore } from "@/lib/plotStore";
 import type { FeatureCollection } from "@/lib/geo";
@@ -180,15 +184,23 @@ export default function AnalysisTypes({ authed = false }: { authed?: boolean }) 
         </ul>
 
         <div className="mt-8">
-          <button
-            type="button"
-            onClick={onRunClick}
-            disabled={selected.length === 0}
-            className="inline-flex items-center gap-2 rounded-lg bg-ink px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-ink-mid disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Run compliance check
-            <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </button>
+          {authed ? (
+            <button
+              type="button"
+              onClick={onRunClick}
+              disabled={selected.length === 0}
+              className={runClass}
+            >
+              Run compliance check
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </button>
+          ) : (
+            // A plain link, so it works even before the page's JavaScript has loaded.
+            <Link href="/login?next=/analyze" className={runClass}>
+              Run compliance check
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          )}
           {!authed && (
             <p className="mt-2 flex items-center gap-1.5 text-xs text-slate-400">
               <Lock className="h-3 w-3" aria-hidden="true" />
