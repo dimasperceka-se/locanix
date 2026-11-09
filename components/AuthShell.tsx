@@ -7,7 +7,7 @@ export default function AuthShell({ label, children }: { label: string; children
     <main className="flex min-h-screen flex-col bg-gradient-to-br from-paper via-paper to-paper-warm">
       <header className="flex items-center gap-3 px-5 py-4 sm:px-8">
         <Link href="/" className="flex items-center" aria-label="Locanix home">
-          <Logo size={24} />
+          <Logo size={30} />
         </Link>
         <span className="h-5 w-px bg-slate-300" />
         <span className="text-sm font-medium text-slate-600">{label}</span>

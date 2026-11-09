@@ -69,7 +69,7 @@ function LoginInner() {
       <header className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center" aria-label="Locanix home">
-            <Logo size={24} />
+            <Logo size={30} />
           </Link>
           <span className="h-5 w-px bg-slate-300" />
           <span className="text-sm font-medium text-slate-600">Log in</span>
@@ -201,7 +201,7 @@ function LoginInner() {
 
       {/* Footer */}
       <footer className="relative z-10 flex flex-col items-center gap-3 px-5 py-8 text-center">
-        <Logo size={22} />
+        <Logo size={28} />
         <p className="text-xs text-slate-400">
           Copyright © 2026 Locanix. All Rights Reserved.
         </p>

@@ -174,8 +174,8 @@ export default function CheckoutClient() {
       <header className="bg-ink-deep text-[#F7F7F4]">
         <div className="mx-auto flex max-w-[1264px] flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-8">
           <Link href="/dashboard" aria-label="Locanix workspace" className="flex items-center gap-2.5 text-[#F7F7F4] no-underline">
-            <LogoMark size={22} tone="light" />
-            <span className="font-display text-[19px] font-semibold tracking-[-0.02em]">Locanix</span>
+            <LogoMark size={28} tone="light" />
+            <span className="font-display text-[19px] font-bold tracking-[-0.01em]">Locanix</span>
           </Link>
           <span className="inline-flex items-center gap-2 text-[14px] text-[#C9CCCA]">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

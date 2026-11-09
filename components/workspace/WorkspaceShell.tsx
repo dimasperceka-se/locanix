@@ -119,8 +119,8 @@ export default function WorkspaceShell({ children }: { children: React.ReactNode
     <div className="flex min-h-screen flex-col bg-canvas leading-[normal] text-ink lg:flex-row">
       <aside className="flex flex-col gap-4 bg-ink-deep px-4 py-4 text-[#C9CCCA] lg:sticky lg:top-0 lg:h-screen lg:w-[232px] lg:flex-none lg:gap-7 lg:py-[22px]">
         <Link href="/" aria-label="Locanix home" className="flex items-center gap-2.5 px-2 text-[#F7F7F4] no-underline">
-          <LogoMark size={22} tone="light" />
-          <span className="font-display text-[19px] font-semibold tracking-[-0.02em]">Locanix</span>
+          <LogoMark size={28} tone="light" />
+          <span className="font-display text-[19px] font-bold tracking-[-0.01em]">Locanix</span>
         </Link>
 
         <nav aria-label="Workspace" className="-mx-1 flex gap-1 overflow-x-auto px-1 text-[15px] lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">

@@ -54,7 +54,7 @@ export default function Navbar({
       }
     >
       <Link href="/" aria-label="Locanix home" className="flex items-center">
-        <Logo size={26} />
+        <Logo size={32} />
       </Link>
 
       <ul className="hidden items-center gap-9 text-[16px] font-medium lg:flex">
