@@ -97,14 +97,16 @@ export default function WorkspaceShell({ children }: { children: React.ReactNode
   const pathname = usePathname();
   const router = useRouter();
   const plan = usePlan();
-  const { userName, userEmail, clear, refreshUser } = usePlotStore();
+  const { userName, userEmail, clear, refreshUser, loadWorkspace, flushWorkspace } = usePlotStore();
   const month = new Date().toLocaleString("en", { month: "short" });
 
   useEffect(() => {
     refreshUser();
-  }, [refreshUser]);
+    void loadWorkspace();
+  }, [refreshUser, loadWorkspace]);
 
   const logout = async () => {
+    await flushWorkspace();
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {

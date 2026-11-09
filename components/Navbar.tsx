@@ -28,9 +28,10 @@ export default function Navbar({
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const { clear } = usePlotStore();
+  const { clear, flushWorkspace } = usePlotStore();
 
   const logout = async () => {
+    await flushWorkspace();
     try {
       const res = await fetch("/api/auth/logout", { method: "POST" });
       if (!res.ok) return; // keep UI as-is if the server didn't clear the session

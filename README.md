@@ -13,7 +13,7 @@ Live domain: `https://locanix.id` · contact: info@locanix.id
 - **Tailwind CSS v4**, design tokens in [`app/globals.css`](app/globals.css)
 - Fonts via `next/font/google`: **Inter Tight** (display), **Inter** (body), **JetBrains Mono** (labels)
 - **OpenLayers** for maps, **@react-pdf/renderer** for the DDS PDF, **xlsx** for Excel export
-- File-based stores in `.data/` (users, billing ledger), PostgreSQL for uploaded plots
+- File-based stores in `.data/` (users, billing ledger, a mirror of each workspace), PostgreSQL for uploaded plots and saved workspaces
 - **PayPal** for one-time and subscription payments; EUDR analysis comes from an external FastAPI service
 
 ## Getting started
@@ -34,7 +34,7 @@ See [`.env.example`](.env.example). The important ones:
 | --- | --- |
 | `APP_URL` | Public origin, used in email links and PayPal return URLs |
 | `SESSION_SECRET` | Signs the session cookie; required in production |
-| `DATABASE_URL` | PostgreSQL for uploaded plots |
+| `DATABASE_URL` | PostgreSQL: the upload log (`plots`) and each user's saved workspace with analysis results (`workspaces`, `workspace_plots`); tables are created on first use |
 | `ANALYSIS_API_BASE` | Root of the EUDR analysis API (see [`docs/FRONTEND-INTEGRATION.md`](docs/FRONTEND-INTEGRATION.md)) |
 | `PAYPAL_*` | PayPal app, plans and webhook; set up with [`scripts/setup-paypal.mjs`](scripts/setup-paypal.mjs) and [`scripts/PAYPAL-WEBHOOK.md`](scripts/PAYPAL-WEBHOOK.md) |
 | `SMTP_*` | Verification, password-reset and contact emails |

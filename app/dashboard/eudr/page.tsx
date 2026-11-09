@@ -11,7 +11,7 @@ import { ui } from "@/components/workspace/ui";
 const COLS = "grid grid-cols-[1.5fr_0.8fr_1fr_1.1fr_1fr_88px] items-center gap-2.5";
 
 export default function ReportsPage() {
-  const { plots } = usePlotStore();
+  const { plots, workspaceLoaded } = usePlotStore();
   const [ddsOpen, setDdsOpen] = useState(false);
   const rows = plots.map((p, i) => ({ plot: p, n: i + 1, v: plotView(p) }));
   const analyzed = rows.filter((r) => r.v.kind === "clear" || r.v.kind === "review").map((r) => r.plot);
@@ -70,7 +70,12 @@ export default function ReportsPage() {
                 </Link>
               </div>
             ))}
-            {!plots.length && (
+            {!plots.length && !workspaceLoaded && (
+              <p role="status" className="m-0 border-t border-[#F0EFEA] px-4.5 py-8 text-center text-[14px] text-muted">
+                Loading your plots…
+              </p>
+            )}
+            {!plots.length && workspaceLoaded && (
               <p className="m-0 border-t border-[#F0EFEA] px-4.5 py-8 text-center text-[14px] text-muted">
                 No plots yet. <Link href="/dashboard" className="font-semibold text-ink">Add plots</Link> to see results here.
               </p>

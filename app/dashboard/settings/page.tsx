@@ -8,7 +8,7 @@ import { ui } from "@/components/workspace/ui";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { userName, userEmail, clear } = usePlotStore();
+  const { userName, userEmail, clear, flushWorkspace } = usePlotStore();
   const [reset, setReset] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const sendReset = async () => {
@@ -26,6 +26,7 @@ export default function SettingsPage() {
   };
 
   const logout = async () => {
+    await flushWorkspace();
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {

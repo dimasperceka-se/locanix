@@ -24,7 +24,10 @@ const PlotDisplayMap = dynamic(() => import("@/components/PlotDisplayMap"), {
 
 export default function ReportDownload() {
   const router = useRouter();
-  const { plots, analyses, survey, updatePlots } = usePlotStore();
+  const { plots, analyses, survey, updatePlots, loadWorkspace } = usePlotStore();
+  useEffect(() => {
+    void loadWorkspace();
+  }, [loadWorkspace]);
   const [running, setRunning] = useState(plots.length > 0);
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState<AnalysisKey[]>([]);

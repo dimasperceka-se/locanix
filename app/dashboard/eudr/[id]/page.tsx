@@ -159,10 +159,17 @@ export default function EudrPlotDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { plots } = usePlotStore();
+  const { plots, workspaceLoaded } = usePlotStore();
   const plot = plots.find((p) => String(p.id) === id);
   const [tab, setTab] = useState<TabKey>("deforestation");
 
+  if (!plot && !workspaceLoaded) {
+    return (
+      <p role="status" className="m-0 py-16 text-center text-[14px] text-muted">
+        Loading your plots…
+      </p>
+    );
+  }
   if (!plot) {
     return (
       <div>

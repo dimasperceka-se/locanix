@@ -106,3 +106,37 @@ test("the plot workspace shows statuses, filters plots and explains the selected
   await expect(page.getByText(account.email, { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: "Send password reset link" })).toBeVisible();
 });
+
+test("plots and analysis results are saved to the account and survive a reload and a new tab", async ({ page, context }) => {
+  await signedInAccount(page, "persist");
+  // Agree to the data-use statement, as the app asks before the first upload.
+  const { version } = await (await page.request.get("/api/consent")).json();
+  expect((await page.request.post("/api/consent", { data: { version } })).ok()).toBeTruthy();
+
+  // Plots with results in this tab's cache, as an upload and a run leave them; the
+  // workspace then saves them to the account.
+  await page.goto("/dashboard");
+  await page.evaluate((v) => sessionStorage.setItem("locanix.plots", v), JSON.stringify({ plots: PLOTS, eudrDone: true }));
+  const saved = page.waitForResponse((r) => r.url().endsWith("/api/workspace") && r.request().method() === "POST");
+  await page.reload();
+  expect((await saved).ok()).toBeTruthy();
+  await expect(page.getByText("3.48 ha", { exact: true })).toBeVisible();
+
+  // A new tab has no cache: everything comes from the server.
+  const tab = await context.newPage();
+  await tab.goto("/dashboard/eudr");
+  await expect(tab.getByText("2 of 4 plots analyzed.", { exact: false })).toBeVisible();
+  await expect(tab.getByText("Overlap · IUCN II")).toBeVisible();
+  await tab.goto("/dashboard/eudr/2");
+  await expect(tab.getByRole("heading", { level: 1, name: "Kebun Kopi Bogor B" })).toBeVisible();
+
+  const { workspace } = await (await tab.request.get("/api/workspace")).json();
+  expect(workspace.plots).toHaveLength(4);
+  expect(workspace.plots[1].eudr.protectedArea).toEqual({ status: "non_compliant", categories: ["II"] });
+});
+
+test("the workspace API refuses plots without data-use consent", async ({ page }) => {
+  await signedInAccount(page, "noconsent");
+  const res = await page.request.post("/api/workspace", { data: { plots: PLOTS, eudrDone: true } });
+  expect(res.status()).toBe(403);
+});

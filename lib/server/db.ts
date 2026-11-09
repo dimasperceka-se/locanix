@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import type { Plot } from "../geo";
 
 /**
  * PostgreSQL access for persisting uploaded plots. The connection string comes
@@ -101,4 +102,161 @@ export async function savePlots(
     params,
   );
   return plots.length;
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Workspaces: each user's current plots with their EUDR results              */
+/* -------------------------------------------------------------------------- */
+
+export const hasDatabase = () => Boolean(process.env.DATABASE_URL);
+
+let workspaceSchemaReady: Promise<void> | null = null;
+
+/**
+ * `workspaces` holds one row per user; `workspace_plots` one row per plot with the
+ * geometry, workspace status and analysis results (summary columns for querying,
+ * plus the full result in `eudr`). Created on first use (idempotent).
+ */
+function ensureWorkspaceSchema(): Promise<void> {
+  if (!workspaceSchemaReady) {
+    workspaceSchemaReady = getPool()
+      .query(`
+        CREATE TABLE IF NOT EXISTS workspaces (
+          user_uid    TEXT PRIMARY KEY,
+          user_email  TEXT,
+          eudr_done   BOOLEAN NOT NULL DEFAULT FALSE,
+          updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE TABLE IF NOT EXISTS workspace_plots (
+          user_uid           TEXT NOT NULL REFERENCES workspaces (user_uid) ON DELETE CASCADE,
+          local_id           INTEGER NOT NULL,
+          position           INTEGER NOT NULL,
+          plot_id            TEXT,
+          name               TEXT NOT NULL,
+          area_ha            DOUBLE PRECISION NOT NULL,
+          is_valid           BOOLEAN NOT NULL,
+          checks             JSONB NOT NULL,
+          issues             JSONB NOT NULL DEFAULT '[]'::jsonb,
+          geometry           JSONB NOT NULL,
+          status             TEXT NOT NULL,
+          deforestation_risk TEXT,
+          loss_ha            DOUBLE PRECISION,
+          wdpa_status        TEXT,
+          wdpa_categories    JSONB,
+          eudr               JSONB,
+          PRIMARY KEY (user_uid, local_id)
+        );
+        CREATE INDEX IF NOT EXISTS workspace_plots_status_idx ON workspace_plots (status);
+      `)
+      .then(() => undefined)
+      .catch((e) => {
+        workspaceSchemaReady = null;
+        throw e;
+      });
+  }
+  return workspaceSchemaReady;
+}
+
+/** Same rules as lib/plotStatus.ts: clear | review | pending | invalid. */
+function statusOf(p: Plot): string {
+  if (!p.isValid) return "invalid";
+  if (!p.eudr) return "pending";
+  const loss = (p.eudr.deforestation?.riskLevel ?? "").toLowerCase() === "high";
+  const status = p.eudr.protectedArea?.status;
+  return loss || status === "non_compliant" || status === "indicative" ? "review" : "clear";
+}
+
+const WS_COLS = 16;
+const WS_JSONB = new Set([7, 8, 9, 14, 15]); // checks, issues, geometry, wdpa_categories, eudr
+
+/** Replace the user's workspace in one transaction. */
+export async function writeWorkspaceToDb(
+  user: { uid: string; email: string },
+  ws: { plots: Plot[]; eudrDone: boolean; updatedAt: number },
+): Promise<void> {
+  await ensureWorkspaceSchema();
+  const client = await getPool().connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `INSERT INTO workspaces (user_uid, user_email, eudr_done, updated_at)
+       VALUES ($1, $2, $3, to_timestamp($4 / 1000.0))
+       ON CONFLICT (user_uid) DO UPDATE
+         SET user_email = EXCLUDED.user_email, eudr_done = EXCLUDED.eudr_done, updated_at = EXCLUDED.updated_at`,
+      [user.uid, user.email, ws.eudrDone, ws.updatedAt],
+    );
+    await client.query("DELETE FROM workspace_plots WHERE user_uid = $1", [user.uid]);
+    for (let start = 0; start < ws.plots.length; start += 200) {
+      const chunk = ws.plots.slice(start, start + 200);
+      const params: unknown[] = [];
+      const tuples = chunk.map((p, i) => {
+        const d = p.eudr?.deforestation;
+        const pa = p.eudr?.protectedArea;
+        params.push(
+          user.uid,
+          p.id,
+          start + i,
+          p.plotId,
+          p.name,
+          p.areaHa,
+          p.isValid,
+          JSON.stringify(p.checks),
+          JSON.stringify(p.issues ?? []),
+          JSON.stringify({ type: "Polygon", coordinates: [closedRing(p.ring)] }),
+          statusOf(p),
+          d ? d.riskLevel.toLowerCase() : null,
+          d ? Math.max(d.gfw.ha, d.jrc.ha, d.sbtn.ha) : null,
+          pa ? pa.status : null,
+          pa ? JSON.stringify(pa.categories) : null,
+          p.eudr ? JSON.stringify(p.eudr) : null,
+        );
+        const o = i * WS_COLS;
+        return `(${Array.from({ length: WS_COLS }, (_, k) => `$${o + k + 1}${WS_JSONB.has(k) ? "::jsonb" : ""}`).join(",")})`;
+      });
+      await client.query(
+        `INSERT INTO workspace_plots
+           (user_uid, local_id, position, plot_id, name, area_ha, is_valid, checks, issues, geometry,
+            status, deforestation_risk, loss_ha, wdpa_status, wdpa_categories, eudr)
+         VALUES ${tuples.join(",")}`,
+        params,
+      );
+    }
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+export async function readWorkspaceFromDb(
+  uid: string,
+): Promise<{ plots: Plot[]; eudrDone: boolean; updatedAt: number } | null> {
+  await ensureWorkspaceSchema();
+  const head = await getPool().query(
+    "SELECT eudr_done, (extract(epoch FROM updated_at) * 1000)::float8 AS updated_ms FROM workspaces WHERE user_uid = $1",
+    [uid],
+  );
+  if (!head.rowCount) return null;
+  const rows = await getPool().query(
+    `SELECT local_id, plot_id, name, area_ha, is_valid, checks, issues, geometry, eudr
+       FROM workspace_plots WHERE user_uid = $1 ORDER BY position`,
+    [uid],
+  );
+  const plots: Plot[] = rows.rows.map((r) => {
+    const plot: Plot = {
+      id: r.local_id,
+      plotId: r.plot_id ?? "",
+      name: r.name,
+      ring: (r.geometry.coordinates[0] as [number, number][]).slice(0, -1), // drop the closing point
+      areaHa: r.area_ha,
+      checks: r.checks,
+      isValid: r.is_valid,
+      issues: r.issues ?? [],
+    };
+    if (r.eudr) plot.eudr = r.eudr;
+    return plot;
+  });
+  return { plots, eudrDone: head.rows[0].eudr_done, updatedAt: Math.round(head.rows[0].updated_ms) };
 }

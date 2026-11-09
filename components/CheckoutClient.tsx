@@ -57,7 +57,7 @@ const stepNo = "mr-2.5 font-mono text-[13px] font-normal text-muted";
 const note = "m-0 text-[14px] leading-[1.6] text-[#3A403C]";
 
 export default function CheckoutClient() {
-  const { plots } = usePlotStore();
+  const { plots, loadWorkspace } = usePlotStore();
   const [cur, setCur] = useState<CurrencyKey>("usd");
   const [planId, setPlanId] = useState<PlanId>("payg");
   const [methodId, setMethodId] = useState<MethodId>("card");
@@ -82,6 +82,7 @@ export default function CheckoutClient() {
     setSubscriptions(data.subscriptions);
   };
   useEffect(() => {
+    void loadWorkspace();
     setCancelled(new URLSearchParams(window.location.search).has("cancelled"));
     refreshBilling().catch((e) => setError(e.message));
   }, []);

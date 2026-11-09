@@ -24,7 +24,7 @@ const COLS = "grid grid-cols-[28px_minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,0.9f
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { plots, userName, analyses, addPlots, updatePlots, setEudrDone } = usePlotStore();
+  const { plots, userName, analyses, addPlots, updatePlots, setEudrDone, workspaceLoaded } = usePlotStore();
   const eudrSteps = analyses.map((k) => {
     const a = analysisByKey(k);
     return { label: a.title, icon: a.icon };
@@ -176,7 +176,11 @@ export default function DashboardPage() {
         </p>
       )}
 
-      {plots.length === 0 ? (
+      {plots.length === 0 && !workspaceLoaded ? (
+        <p role="status" className="m-0 py-16 text-center text-[14px] text-muted">
+          Loading your plots…
+        </p>
+      ) : plots.length === 0 ? (
         <div className={`${ui.card} mx-auto mt-6 flex w-full max-w-md flex-col items-center gap-2 p-10 text-center`}>
           <p className="m-0 text-[16px] font-semibold">No plots yet</p>
           <p className="m-0 text-[14px] text-muted">Upload a GeoJSON file or draw a boundary to start.</p>

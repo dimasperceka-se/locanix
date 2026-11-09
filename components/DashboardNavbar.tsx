@@ -12,13 +12,14 @@ const linkClass = "text-[15px] font-medium text-ink no-underline transition-colo
 
 export default function DashboardNavbar() {
   const router = useRouter();
-  const { userName, clear, refreshUser } = usePlotStore();
+  const { userName, clear, refreshUser, flushWorkspace } = usePlotStore();
 
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
 
   const logout = async () => {
+    await flushWorkspace();
     try {
       await fetch("/api/auth/logout", { method: "POST" });
     } catch {

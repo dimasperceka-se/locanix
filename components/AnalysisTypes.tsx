@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle, ArrowRight, Check, Leaf, Lock, Shapes } from "lucide-react";
@@ -25,7 +25,11 @@ type Outcome = "fail" | "dashboard" | "survey" | "report" | "payment";
 
 export default function AnalysisTypes({ authed = false }: { authed?: boolean }) {
   const router = useRouter();
-  const { setPlots, setAnalyses, setIsBulk } = usePlotStore();
+  const { addPlots, setAnalyses, setIsBulk, loadWorkspace } = usePlotStore();
+  // Load the saved workspace so new plots are added to it, not instead of it.
+  useEffect(() => {
+    if (authed) void loadWorkspace();
+  }, [authed, loadWorkspace]);
   const [selected, setSelected] = useState<AnalysisKey[]>(DEFAULT_SELECTED);
   const [modalOpen, setModalOpen] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
@@ -63,7 +67,7 @@ export default function AnalysisTypes({ authed = false }: { authed?: boolean }) 
         outcomeRef.current = "fail";
         return;
       }
-      setPlots(plots);
+      addPlots(plots);
       // Persist every uploaded plot to the database (best-effort).
       void persistPlots(plots, "upload");
 
