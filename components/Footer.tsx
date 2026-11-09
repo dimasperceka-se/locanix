@@ -44,17 +44,6 @@ export default function Footer() {
             </a>
           ))}
         </div>
-        <div className="flex flex-col gap-2.5 leading-[1.6]">
-          <span className={heading}>{company.legalName}</span>
-          <span>
-            {company.address.map((line, i) => (
-              <span key={line}>
-                {i > 0 && <br />}
-                {line}
-              </span>
-            ))}
-          </span>
-        </div>
       </div>
       <div className="mx-auto max-w-[1360px] px-5 pt-5 pb-8 text-[13px] text-[#8A908C] sm:px-10">
         © {new Date().getFullYear()} Locanix. All rights reserved.

@@ -148,9 +148,7 @@ export const legalLinks: NavLink[] = [
 
 /** Company / contact details shown in the footer. */
 export const company = {
-  legalName: "PT Niaga Bumi Lestari",
   tagline: "Know which plots are safe to ship.",
-  address: ["Prosperity Tower, 8th Floor, SCBD", "Jakarta Selatan 12190"],
   email: "info@locanix.id",
 };
 
