@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "name": "single_plot",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Kebun A", "owner": "Demo Estate" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [98.29900, 3.51950],
+            [98.30023, 3.51950],
+            [98.30023, 3.52074],
+            [98.29900, 3.52074],
+            [98.29900, 3.51950]
+          ]
+        ]
+      }
+    }
+  ]
+}

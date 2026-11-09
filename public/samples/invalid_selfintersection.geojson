@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "name": "invalid_selfintersection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Bad geometry (bowtie)" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [101.46000, 0.52000],
+            [101.47000, 0.53000],
+            [101.46000, 0.53000],
+            [101.47000, 0.52000],
+            [101.46000, 0.52000]
+          ]
+        ]
+      }
+    }
+  ]
+}

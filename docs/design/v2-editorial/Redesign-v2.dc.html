@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Locanix — landing page v2</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0D0F0E}a:hover{color:#1F7A50}
+</style>
+</helmet>
+
+<div style="font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #0D0F0E; background: #FAFAF7; width: 100%; min-width: 0">
+
+  <!-- HERO (dark, with rotating globe) -->
+  <section id="top" style="background: #16191C; color: #F2F2EE; overflow: hidden">
+    <div style="max-width: 1360px; margin: 0 auto; padding: 24px 32px 0">
+      <header style="background: #F4F3EE; color: #0D0F0E; border-radius: 16px; padding: 12px 14px 12px 22px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px">
+        <a href="#top" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #0D0F0E">
+          <svg width="26" height="26" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M4 20 L11 5 L24 9 L21 23 Z" stroke="#0D0F0E" stroke-width="2.4" stroke-linejoin="round"></path><circle cx="11" cy="5" r="2.8" fill="#1F9D5C"></circle></svg>
+          <span style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 21px; letter-spacing: -0.02em">Locanix</span>
+        </a>
+        <nav aria-label="Main" style="display: flex; flex-wrap: wrap; gap: 36px; font-size: 16px; font-weight: 500">
+          <a href="#how" style="color: #0D0F0E; text-decoration: none">How it works</a>
+          <a href="#eudr" style="color: #0D0F0E; text-decoration: none">EUDR</a>
+          <a href="#pricing" style="color: #0D0F0E; text-decoration: none">Pricing</a>
+          <a href="#about" style="color: #0D0F0E; text-decoration: none">Company</a>
+        </nav>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+          <a href="#login" style="text-decoration: none; color: #0D0F0E; font-size: 14px; font-weight: 600; border: 1px solid #A9A8A0; padding: 0 16px; border-radius: 999px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">Log in</a>
+          <a href="#start" style="text-decoration: none; color: #0D0F0E; font-size: 15px; font-weight: 600; background: {{accent}}; padding: 0 18px; border-radius: 999px; min-height: 44px; box-sizing: border-box; display: inline-flex; align-items: center">Try Locanix →</a>
+        </div>
+      </header>
+    </div>
+
+    <div style="max-width: 1360px; margin: 0 auto; padding: 56px 32px 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 32px; align-items: center">
+      <div style="display: flex; flex-direction: column; gap: 28px">
+        <h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: clamp(52px, 6.4vw, 92px); line-height: 0.98; letter-spacing: -0.045em; color: #F7F7F4">Know which plots are safe to ship.</h1>
+        <p style="margin: 0; font-size: 20px; line-height: 1.5; color: #C9CCCA; max-width: 470px">Locanix checks every plot boundary for forest loss after 2020 and overlap with protected areas, and shows which ones need a second look before you file.</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px">
+          <a href="#start" style="text-decoration: none; font-size: 16px; font-weight: 600; background: {{accent}}; color: #0D0F0E; padding: 0 22px; min-height: 48px; box-sizing: border-box; display: inline-flex; align-items: center; border-radius: 999px">Analyze 10 ha free →</a>
+          <a href="#how" style="text-decoration: none; font-size: 16px; font-weight: 600; color: {{accent}}">See how it works →</a>
+        </div>
+      </div>
+
+      <div style="position: relative; justify-self: center; width: 100%; max-width: 640px">
+        <div role="img" aria-label="Rotating globe made of dots, with plot markers across Indonesia" style="position: relative; width: 100%; aspect-ratio: 1 / 1">
+          <canvas ref="{{ globeRef }}" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block"></canvas>
+        </div>
+        <div style="position: absolute; right: 0; bottom: 6%; width: min(290px, 78%); background: #23282C; border: 1px solid #343A3F; border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 20px 40px rgba(0,0,0,0.35)">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+            <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A9AFAB">Plot B · Riau, ID</span>
+            <span style="font-size: 12px; font-weight: 600; color: #2A1504; background: #F2A65A; padding: 3px 9px; border-radius: 999px">Needs review</span>
+          </div>
+          <span style="font-size: 15px; line-height: 1.45; color: #F2F2EE">3.2 ha overlaps a protected area (IUCN II). No forest loss after 2020.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="max-width: 1360px; margin: 0 auto; padding: 24px 32px 48px; display: flex; flex-wrap: wrap; gap: 12px 32px; font-size: 16px; color: #E4E6E4">
+      <span style="display: inline-flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9AFAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18 L9 5 L20 8 L17 20 Z"></path></svg>Plot screening</span>
+      <span style="display: inline-flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9AFAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6"></circle><path d="M20 20l-4.5-4.5"></path></svg>Evidence review</span>
+      <span style="display: inline-flex; align-items: center; gap: 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A9AFAB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"></path><path d="M14 3v5h5"></path></svg>Audit-ready PDF</span>
+    </div>
+  </section>
+
+  <!-- HERO VISUAL: product frame -->
+  <section aria-label="Product preview" style="max-width: 1280px; margin: 0 auto; padding: 96px 40px 96px">
+    <div role="img" aria-label="Locanix review screen: a map of four plot boundaries next to a table ranking them by status, with two flagged for review" style="background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 20px; overflow: hidden; display: flex; flex-wrap: wrap; box-shadow: 0 30px 80px rgba(13,15,14,0.08)">
+
+      <div style="flex: 1 1 520px; min-width: 0; position: relative; background: #EEF0EA; min-height: 440px">
+        <svg viewBox="0 0 600 460" preserveAspectRatio="xMidYMid slice" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+          <g fill="none" stroke="#D6DAD1" stroke-width="1">
+            <path d="M-20 50 C 120 10, 220 90, 340 46 S 540 6, 640 60"></path>
+            <path d="M-20 110 C 130 70, 230 150, 350 106 S 550 66, 640 120"></path>
+            <path d="M-20 170 C 140 130, 240 210, 360 166 S 560 126, 640 180"></path>
+            <path d="M-20 230 C 150 190, 250 270, 370 226 S 570 186, 640 240"></path>
+            <path d="M-20 290 C 160 250, 260 330, 380 286 S 580 246, 640 300"></path>
+            <path d="M-20 350 C 170 310, 270 390, 390 346 S 590 306, 640 360"></path>
+            <path d="M-20 410 C 180 370, 280 450, 400 406 S 600 366, 640 420"></path>
+          </g>
+          <path d="M380 0 C 400 120, 470 160, 600 170 L600 0 Z" fill="#DCE6D6"></path>
+          <text x="470" y="60" font-family="JetBrains Mono, monospace" font-size="11" fill="#5C6A58">Protected area</text>
+          <polygon points="70,120 190,80 250,170 140,230" fill="#0D0F0E" fill-opacity="0.06" stroke="#0D0F0E" stroke-width="1.8" stroke-linejoin="round"></polygon>
+          <polygon points="300,90 420,70 450,190 330,200" fill="#E07A1F" fill-opacity="0.16" stroke="#C2620F" stroke-width="2.2" stroke-linejoin="round"></polygon>
+          <polygon points="110,290 220,260 260,360 150,390" fill="#E07A1F" fill-opacity="0.16" stroke="#C2620F" stroke-width="2.2" stroke-linejoin="round"></polygon>
+          <polygon points="330,270 470,250 500,370 360,400" fill="#0D0F0E" fill-opacity="0.06" stroke="#0D0F0E" stroke-width="1.8" stroke-linejoin="round"></polygon>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="#0D0F0E">
+            <text x="130" y="160">A</text><text x="368" y="146">B</text><text x="178" y="334">C</text><text x="410" y="330">D</text>
+          </g>
+        </svg>
+        <div style="position: absolute; left: 18px; bottom: 18px; display: flex; flex-wrap: wrap; gap: 14px; background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 10px; padding: 10px 14px; font-size: 13px">
+          <span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border: 2px solid #0D0F0E; border-radius: 3px"></span>Clear</span>
+          <span style="display: inline-flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border: 2px solid #C2620F; background: #F8DEC4; border-radius: 3px"></span>Needs review</span>
+        </div>
+      </div>
+
+      <div style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column">
+        <div style="padding: 20px 24px; border-bottom: 1px solid #ECEBE5; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap">
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <span style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 17px">Supplier plots — Riau</span>
+            <span style="font-size: 13px; color: #6A706C">4 plots · 162.9 ha · 2 need review</span>
+          </div>
+          <span style="font-size: 13px; font-weight: 600; border: 1px solid #C9C8C0; border-radius: 999px; padding: 8px 14px">Export PDF</span>
+        </div>
+        <div style="overflow-x: auto">
+          <div style="min-width: 400px">
+            <div style="display: grid; grid-template-columns: 40px 1.3fr 1fr 1fr; gap: 10px; padding: 12px 24px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: #6A706C">
+              <span>ID</span><span>Status</span><span>Forest loss</span><span>Protected</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1.3fr 1fr 1fr; gap: 10px; padding: 14px 24px; border-top: 1px solid #F0EFEA; font-size: 14px; align-items: center">
+              <span style="font-family: 'JetBrains Mono', monospace">B</span>
+              <span style="justify-self: start; font-size: 12px; font-weight: 600; color: #8A3F06; background: #FBE6D2; padding: 4px 10px; border-radius: 999px">Needs review</span>
+              <span>0 ha</span><span style="color: #8A3F06; font-weight: 600">3.2 ha overlap</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1.3fr 1fr 1fr; gap: 10px; padding: 14px 24px; border-top: 1px solid #F0EFEA; font-size: 14px; align-items: center">
+              <span style="font-family: 'JetBrains Mono', monospace">C</span>
+              <span style="justify-self: start; font-size: 12px; font-weight: 600; color: #8A3F06; background: #FBE6D2; padding: 4px 10px; border-radius: 999px">Needs review</span>
+              <span style="color: #8A3F06; font-weight: 600">0.4 ha</span><span>None</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1.3fr 1fr 1fr; gap: 10px; padding: 14px 24px; border-top: 1px solid #F0EFEA; font-size: 14px; align-items: center">
+              <span style="font-family: 'JetBrains Mono', monospace">A</span>
+              <span style="justify-self: start; font-size: 12px; font-weight: 600; color: #145236; background: #DDF1E5; padding: 4px 10px; border-radius: 999px">Clear</span>
+              <span>0 ha</span><span>None</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 40px 1.3fr 1fr 1fr; gap: 10px; padding: 14px 24px; border-top: 1px solid #F0EFEA; font-size: 14px; align-items: center">
+              <span style="font-family: 'JetBrains Mono', monospace">D</span>
+              <span style="justify-self: start; font-size: 12px; font-weight: 600; color: #145236; background: #DDF1E5; padding: 4px 10px; border-radius: 999px">Clear</span>
+              <span>0 ha</span><span>None</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin: auto 24px 24px; padding: 14px 16px; background: #F4F4EF; border-radius: 10px; font-size: 14px; line-height: 1.55; color: #3A403C">Plot B overlaps a protected area (IUCN category II). Plot C shows forest loss after 31 Dec 2020. Resolve both before filing your due diligence statement.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF PLACEHOLDER -->
+  <section aria-label="Customers" style="border-top: 1px solid #E2E1DA; border-bottom: 1px solid #E2E1DA">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 36px 40px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px">
+      <span style="font-size: 14px; color: #6A706C">Used by exporters, estates and cooperatives</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6A706C; border: 1px dashed #C9C8C0; border-radius: 8px; padding: 12px 20px">[Customer logo]</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6A706C; border: 1px dashed #C9C8C0; border-radius: 8px; padding: 12px 20px">[Customer logo]</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6A706C; border: 1px dashed #C9C8C0; border-radius: 8px; padding: 12px 20px">[Customer logo]</span>
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6A706C; border: 1px dashed #C9C8C0; border-radius: 8px; padding: 12px 20px">[Customer logo]</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS: Input → Analysis → Output -->
+  <section id="how" style="max-width: 1280px; margin: 0 auto; padding: 128px 40px 112px; display: flex; flex-direction: column; gap: 56px">
+    <div style="display: flex; flex-direction: column; gap: 18px; max-width: 760px">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #1F7A50">How it works</span>
+      <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: clamp(36px, 4.4vw, 60px); line-height: 1.02; letter-spacing: -0.035em">One upload in. A clear verdict out.</h2>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 16px">
+
+      <div style="background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #6A706C">01 · INPUT</span>
+        <h3 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">Add your plots</h3>
+        <div style="border: 1.5px dashed #C9C8C0; border-radius: 12px; padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; background: #FAFAF7">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0D0F0E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>
+          <span style="font-weight: 600; font-size: 15px">Drop a GeoJSON file</span>
+          <span style="font-size: 13px; color: #6A706C">or draw the boundary on the map</span>
+        </div>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #4A504C">One plot or a whole supplier list. Every polygon is checked for self-intersections, area and perimeter before analysis starts.</p>
+      </div>
+
+      <div id="eudr" style="background: #0D0F0E; color: #F2F2EE; border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #A9AFAB">02 · ANALYSIS</span>
+        <h3 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">Run EUDR checks</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px">
+          <div style="border: 1px solid #2E3431; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-weight: 600; font-size: 15px">Deforestation</span><span style="font-size: 11px; font-weight: 600; color: #0D0F0E; background: {{accent}}; padding: 3px 8px; border-radius: 999px">Live</span></div>
+            <span style="font-size: 14px; line-height: 1.5; color: #B9BFBB">Tree-cover loss after 31 Dec 2020 inside the boundary.</span>
+          </div>
+          <div style="border: 1px solid #2E3431; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; justify-content: space-between; gap: 8px; align-items: center"><span style="font-weight: 600; font-size: 15px">Land legality</span><span style="font-size: 11px; font-weight: 600; color: #0D0F0E; background: {{accent}}; padding: 3px 8px; border-radius: 999px">Live</span></div>
+            <span style="font-size: 14px; line-height: 1.5; color: #B9BFBB">Overlap with WDPA protected areas, with IUCN category.</span>
+          </div>
+        </div>
+        <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #A9AFAB">Coming next: GHG emission, rainfall, biomass, fire detection, crop health, mills nearby.</p>
+      </div>
+
+      <div style="background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 20px">
+        <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; color: #6A706C">03 · OUTPUT</span>
+        <h3 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.02em">Review and export</h3>
+        <div style="display: flex; flex-direction: column">
+          <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 0; border-bottom: 1px solid #ECEBE5"><span style="font-weight: 600; font-size: 15px">Review table</span><span style="font-size: 14px; color: #4A504C; line-height: 1.5">Plots ranked by status, with a detail view per plot.</span></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 0; border-bottom: 1px solid #ECEBE5"><span style="font-weight: 600; font-size: 15px">Audit-ready PDF</span><span style="font-size: 14px; color: #4A504C; line-height: 1.5">Evidence for buyers, auditors and your due diligence statement.</span></div>
+          <div style="display: flex; flex-direction: column; gap: 4px; padding: 14px 0"><span style="font-weight: 600; font-size: 15px">AI insights</span><span style="font-size: 14px; color: #4A504C; line-height: 1.5">What to fix first, written from your own plot data.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" style="background: #F1F1EB; border-top: 1px solid #E2E1DA">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 120px 40px; display: flex; flex-direction: column; gap: 48px">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px">
+        <div style="display: flex; flex-direction: column; gap: 18px; max-width: 680px">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #1F7A50">Pricing</span>
+          <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: clamp(36px, 4.4vw, 60px); line-height: 1.02; letter-spacing: -0.035em">Pay per hectare. Or subscribe.</h2>
+          <p style="margin: 0; font-size: 17px; color: #4A504C">First 10 ha free on every plan.</p>
+        </div>
+        <div role="group" aria-label="Currency" style="display: inline-flex; background: #FFFFFF; border: 1px solid #DAD9D2; border-radius: 999px; padding: 4px; gap: 4px">
+          <button type="button" onClick="{{ pickIdr }}" aria-pressed="{{ idrPressed }}" style="{{ idrStyle }}">IDR</button>
+          <button type="button" onClick="{{ pickUsd }}" aria-pressed="{{ usdPressed }}" style="{{ usdStyle }}">USD</button>
+        </div>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px">
+        <sc-for list="{{ tiers }}" as="tier" hint-placeholder-count="3">
+          <article style="{{ tier.cardStyle }}">
+            <h3 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 20px; font-weight: 600">{{ tier.name }}</h3>
+            <p style="{{ tier.mutedStyle }}">{{ tier.tagline }}</p>
+            <div style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-top: 8px">
+              <span style="font-family: 'Inter Tight', sans-serif; font-size: 44px; font-weight: 600; letter-spacing: -0.03em">{{ tier.price }}</span>
+              <span style="{{ tier.mutedStyle }}">{{ tier.unit }}</span>
+            </div>
+            <p style="margin: 0; font-size: 14px; font-weight: 600">{{ tier.sub }}</p>
+            <a href="#start" style="{{ tier.ctaStyle }}">{{ tier.cta }}</a>
+            <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px">
+              <sc-for list="{{ tier.features }}" as="f" hint-placeholder-count="4">
+                <li style="display: flex; gap: 10px; align-items: flex-start">
+                  <span style="{{ tier.dotStyle }}"></span><span>{{ f }}</span>
+                </li>
+              </sc-for>
+            </ul>
+            <p style="{{ tier.noteStyle }}">{{ tier.note }}</p>
+          </article>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section id="start" style="background: #0D0F0E; color: #F2F2EE">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 136px 40px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px">
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: #A9AFAB">Start with one plot</span>
+      <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: clamp(44px, 6vw, 84px); line-height: 1; letter-spacing: -0.04em; max-width: 900px">Your first 10 hectares are on us.</h2>
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+        <a href="#register" style="text-decoration: none; font-size: 16px; font-weight: 600; background: {{accent}}; color: #0D0F0E; padding: 16px 26px; border-radius: 999px">Try Locanix →</a>
+        <a href="#contact" style="text-decoration: none; font-size: 16px; font-weight: 500; color: #F2F2EE; border: 1px solid #3E4541; padding: 15px 24px; border-radius: 999px">Talk to us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="background: #0D0F0E; color: #A9AFAB; border-top: 1px solid #262B28">
+    <div style="max-width: 1280px; margin: 0 auto; padding: 56px 40px 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 36px; font-size: 14px">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="font-family: 'Inter Tight', sans-serif; font-weight: 700; font-size: 19px; color: #F2F2EE">Locanix</span>
+        <span>Know which plots are safe to ship.</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="color: #F2F2EE; font-weight: 600">Product</span>
+        <a href="#how" style="color: #A9AFAB; text-decoration: none">How it works</a>
+        <a href="#eudr" style="color: #A9AFAB; text-decoration: none">EUDR</a>
+        <a href="#pricing" style="color: #A9AFAB; text-decoration: none">Pricing</a>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <span style="color: #F2F2EE; font-weight: 600">Company</span>
+        <a href="#contact" style="color: #A9AFAB; text-decoration: none">[Locanix contact email]</a>
+        <a href="#linkedin" style="color: #A9AFAB; text-decoration: none">LinkedIn [link]</a>
+        <a href="#privacy" style="color: #A9AFAB; text-decoration: none">Privacy policy</a>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 10px; line-height: 1.6">
+        <span style="color: #F2F2EE; font-weight: 600">PT Niaga Bumi Lestari</span>
+        <span>Prosperity Tower, 8th Floor, SCBD<br>Jakarta Selatan 12190</span>
+      </div>
+    </div>
+    <div style="max-width: 1280px; margin: 0 auto; padding: 20px 40px 32px; font-size: 13px; color: #8A908C">© 2026 Locanix. All rights reserved.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#3DDC84","options":["#3DDC84","#C8F169","#7DD3FC"]},"$preview":{"width":1440,"height":4900}}'>
+const LAND = [832,-396,829,-720,822,-844,820,-319,818,-644,814,-443,811,-768,810,-242,808,-567,805,483,804,-366,799,-490,796,-290,794,235,794,-614,791,-414,790,961,788,-213,786,-538,784,-862,783,-337,783,1038,782,188,781,-662,778,-461,777,-786,776,-260,775,-1110,774,-585,772,-910,771,-384,770,-709,769,-184,767,-508,766,-833,765,-308,765,1067,761,-432,761,943,759,619,759,-231,758,-1081,757,-556,755,-355,755,1020,752,-1004,751,-479,751,896,750,1421,750,-804,749,571,749,-279,749,1097,748,-1128,745,-403,745,973,743,-202,742,-527,740,-326,740,1049,739,-1176,737,-975,737,-450,736,925,735,-775,734,1126,731,-373,731,1002,731,-1223,729,1202,729,-1023,728,-497,728,878,727,-822,727,553,726,-297,726,1078,726,-1147,725,754,724,1279,724,-946,723,-421,723,954,722,1480,721,1155,721,-1070,720,830,719,-869,718,-344,718,1031,717,706,716,1232,716,-993,715,-468,715,907,714,1432,714,-793,713,-267,713,1108,713,-1117,712,783,711,-391,710,984,710,1509,709,-716,709,-1566,709,1184,708,-1041,707,860,707,1385,707,-840,706,-315,706,1060,705,1586,704,1261,704,-964,703,-439,703,936,702,1462,702,-763,702,-1613,701,1137,701,-1088,701,287,700,812,700,1338,699,-362,699,1013,698,1538,698,-687,697,688,697,-1537,697,1214,696,1739,696,-486,696,889,695,1414,694,-285,694,1090,694,-1135,694,240,694,1615,693,765,693,-1460,693,1290,692,-935,692,-409,692,966,691,-1259,691,1491,691,-734,691,641,690,-1584,690,1166,690,316,689,1691,689,842,689,-1383,688,1367,688,-333,687,1042,687,-1183,687,192,687,1567,686,718,686,-1507,686,1243,685,1768,685,-457,685,918,685,-1307,684,1443,684,-1631,683,1119,683,269,683,1644,682,794,682,-1431,682,1319,682,-905,681,-380,681,995,681,-1230,680,1520,680,-705,680,670,680,-1555,679,1195,679,-1029,679,346,679,1721,678,871,678,-1354,678,1396,678,-829,677,546,677,1072,677,-1153,676,222,676,1597,676,747,676,-1478,675,1272,675,-953,675,1797,675,-428,674,948,674,-1277,674,1473,673,623,673,-1602,673,1148,672,298,672,1673,672,824,672,-1401,671,1349,671,-876,671,499,671,-351,670,1024,670,-1201,670,174,670,1549,670,-676,670,700,669,-1525,669,1225,669,-1000,669,375,668,1750,668,-475,668,900,668,-1325,668,1425,667,576,667,1101,666,-1124,666,251,666,1626,666,776,666,-1449,665,1301,665,-924,665,452,665,-1773,664,-398,664,977,664,-1248,664,1502,664,-723,663,652,663,-1573,663,1177,663,-1048,663,328,662,1703,662,-522,662,853,662,-1372,661,1378,661,528,661,-1697,661,1053,660,-1172,660,204,660,1579,660,-646,660,729,659,-1496,659,1254,659,-971,659,1779,658,-446,658,929,658,-1295,658,1455,657,605,657,-1620,657,1130,657,-1095,657,280,656,1655,656,805,656,-1419,655,1331,655,-894,655,481,655,-1744,655,1006,654,-1219,654,156,654,1531,654,-694,654,681,654,-1543,653,-168,653,1207,653,-1018,653,1732,653,-493,652,882,652,-1343,652,1407,652,557,651,1083,651,-1142,651,1608,650,758,650,-1467,650,1283,649,-942,649,433,649,-416,649,959,649,-1266,648,1484,648,-741,648,634,648,-1591,648,-216,647,1159,647,-1066,647,309,647,1685,647,835,646,-1390,646,1360,646,510,645,1035,645,-1190,645,185,645,1561,645,-664,644,711,644,-1514,644,1236,644,-989,644,386,643,1761,643,-464,643,911,643,-1314,643,1437,642,587,642,1112,642,-1113,641,262,641,1637,641,787,641,-1438,641,1313,640,-912,640,463,640,988,640,-1237,639,138,639,1513,639,-712,639,663,639,-1562,639,-186,638,1189,638,-1036,638,339,638,1714,638,-511,638,864,637,-1361,637,1389,637,539,636,1065,636,-1160,636,1590,635,740,635,-1485,635,1265,635,-960,635,415,634,-434,634,941,634,-1284,634,91,634,1466,633,616,633,-1609,633,1141,633,-1084,633,291,632,1666,632,817,632,-1408,632,1342,631,492,631,1017,631,-1208,631,167,630,1542,630,-682,630,693,630,-1532,630,1218,629,-1007,629,368,629,1743,629,-482,629,893,629,-1332,628,1418,628,569,628,1094,627,-1131,627,244,627,1619,627,769,627,-1456,626,1294,626,-930,626,445,626,970,625,-1255,625,120,625,1495,625,645,625,-1580,624,1170,624,-1054,624,321,624,1696,624,846,623,-1379,623,1371,623,521,622,1047,622,-1178,622,1572,622,722,621,-1503,621,1247,621,-978,621,397,620,-453,620,923,620,-1302,620,73,620,1448,620,-777,620,598,619,-1627,619,1123,619,-1102,619,273,619,1648,618,799,618,-1426,618,1324,618,474,617,999,617,-1226,617,149,617,1524,616,675,616,-1550,616,1200,616,-1025,616,350,615,1725,615,875,615,-1350,615,1400,614,551,614,1076,614,-1149,614,226,613,1601,613,751,613,-1474,613,1276,613,-949,612,427,612,952,612,-1273,612,102,612,1477,611,-748,611,627,611,-1598,611,1152,611,-1073,611,303,610,1678,610,828,610,-1397,610,1353,609,503,609,1028,609,-1197,608,1554,608,704,608,-1521,608,1229,608,-996,607,379,607,904,607,-1320,607,1430,606,580,606,-1645,606,1105,606,-1120,606,255,605,1630,605,780,605,-1444,605,1306,604,456,604,981,604,-1244,604,131,603,1506,603,-719,603,656,603,-1568,603,1182,603,-1043,602,332,602,857,602,-1368,602,1382,601,532,601,1058,601,-1167,600,733,600,1258,600,-967,599,408,599,-441,599,934,599,-1291,599,84,599,1459,598,-766,598,609,598,-1616,598,1134,598,-1091,598,284,597,810,597,1335,596,485,596,1010,596,-1215,596,160,596,1536,595,686,595,-1539,595,1211,595,-1014,595,361,594,886,594,-1339,594,1412,594,562,593,1087,593,-1138,593,1612,592,762,592,1288,592,438,591,963,591,-1262,591,113,591,-737,591,638,590,-1587,590,1164,590,-1061,590,314,589,839,589,1364,589,514,588,1040,588,-1185,588,-660,588,715,587,1240,587,-985,587,390,587,916,586,-1309,586,66,586,-784,586,591,585,1116,585,-1109,585,266,585,792,584,1317,584,467,584,992,584,-1233,583,142,583,-707,583,668,583,-1557,583,1193,582,-1032,582,343,582,868,582,-1357,582,1393,581,544,581,1069,581,-1156,580,1594,580,-631,580,744,580,1269,580,-955,579,420,579,945,579,-1280,579,-755,578,620,578,1145,578,-1079,578,296,577,821,577,1346,577,496,576,1022,576,-1203,576,-678,576,697,575,-1528,575,1222,575,-1003,575,372,575,898,574,-1327,574,573,573,1098,573,-1127,573,248,573,1623,573,774,572,1299,572,-926,572,449,572,974,572,-1251,571,124,571,-726,571,650,571,-1575,571,1175,571,-1050,570,325,570,850,570,1375,569,526,569,1051,569,-1174,569,1576,568,-649,568,726,568,1251,568,-974,568,402,567,927,567,-1298,567,602,566,1127,566,-1098,566,278,566,803,565,-47,565,1328,565,-897,565,478,565,1003,564,-1222,564,154,564,-696,564,679,563,1204,563,-1021,563,354,563,879,562,555,562,1080,562,-1145,562,230,561,1605,561,-620,561,755,561,1281,561,-944,561,431,560,956,560,-1269,560,-744,560,631,559,-1593,559,1157,559,-1068,559,307,558,832,558,1357,558,-868,558,507,557,1033,557,-1192,557,1558,557,-667,557,708,556,1233,556,-992,556,383,556,909,556,-1316,555,584,555,1109,555,-1116,555,259,554,785,554,1310,554,-915,554,460,553,985,553,-1240,553,-714,553,661,552,1186,552,-1039,552,336,552,861,551,-838,551,537,551,1062,550,-1163,550,1587,550,-638,550,737,550,1263,549,-962,549,413,549,938,549,-1287,549,88,548,-762,548,613,548,1139,548,-1086,548,289,547,814,547,1339,547,-886,547,489,546,1015,546,-1210,546,-685,546,690,545,1215,545,-1010,545,365,545,891,544,566,544,1091,544,-1134,543,241,543,-608,543,767,543,-83,543,1292,543,-933,542,442,542,967,542,-1258,542,-732,542,643,541,1168,541,-1057,541,318,541,843,540,-7,540,-856,540,519,540,1044,539,-1181,539,194,539,1569,539,-656,539,719,539,1244,538,-980,538,395,538,920,537,-780,537,595,537,1120,537,-1104,537,271,537,-579,536,796,536,1321,536,-904,536,471,535,997,535,-1228,535,147,535,-703,535,672,534,1197,534,-1028,534,347,534,873,534,1398,533,-827,533,548,533,-1677,533,1073,533,-1152,533,223,533,1598,532,-627,532,749,532,1274,532,-951,532,424,531,949,531,-1276,531,99,531,-751,531,625,530,1150,530,-1075,530,300,530,825,530,-25,529,1350,529,-875,529,501,529,1026,529,-1199,529,176,528,-674,528,701,528,1226,528,-999,528,377,527,902,527,52,527,1427,527,577,526,1102,526,-1123,526,253,526,-597,526,778,526,-72,525,1303,525,-922,525,453,525,978,525,-1247,525,129,524,-721,524,654,524,1179,524,-1046,524,329,523,854,523,5,523,1380,523,-845,523,530,522,1055,522,-1170,522,205,522,1580,522,-645,522,730,521,1256,521,-969,521,406,521,931,521,81,520,-769,520,606,520,1132,520,-1093,520,282,519,-568,519,807,519,-43,519,1332,519,-893,519,482,518,1008,518,-1217,518,158,518,-692,518,683,517,1208,517,-1017,517,358,517,884,517,1409,516,-816,516,559,516,1084,516,-1141,516,234,516,-615,515,760,515,1285,515,-940,515,435,514,960,514,-1265,514,110,514,-739,514,636,514,1161,513,-1064,513,311,513,836,513,-14,513,1362,513,-863,512,512,512,1037,512,-1188,512,187,512,-663,512,712,511,1238,511,-987,511,388,511,913,510,63,510,-787,510,588,510,1114,510,-1111,509,264,509,789,509,1314,509,-911,509,464,508,990,508,-1235,508,140,508,-710,508,665,507,1190,507,-1035,507,340,507,866,507,16,506,1391,506,-834,506,541,506,1066,506,-1159,506,216,505,-633,505,742,505,1267,505,-958,505,417,504,942,504,92,504,-757,504,618,503,1143,503,-1082,503,293,503,818,503,1343,502,-881,502,494,502,1019,502,-1206,502,169,502,-681,501,694,501,1219,501,-1005,501,370,501,895,500,45,500,-805,500,570,500,1095,500,-1129,499,246,499,771,499,1296,499,-929,499,446,498,972,498,-1253,498,122,498,-728,498,647,497,1172,497,-1053,497,322,497,848,496,1373,496,-852,496,523,496,1048,496,-1177,496,198,495,724,495,1249,495,-976,495,399,494,924,494,74,494,-776,494,600,494,1125,493,-1100,493,275,493,-575,493,800,493,1325,493,-900,492,476,492,1001,492,-1224,492,151,492,-699,492,676,491,1201,491,-1024,491,352,491,877,491,27,490,1402,490,-823,490,552,490,1077,490,-1148,490,228,489,753,489,1278,489,-947,489,428,488,953,488,104,488,-746,488,629,488,1154,487,-1071,487,304,487,-546,487,829,487,1355,487,-870,486,505,486,1030,486,-1195,486,180,486,-670,486,705,485,1231,485,-994,485,381,485,906,485,56,484,-794,484,581,484,1107,484,-1118,484,257,483,782,483,1307,483,-918,483,457,483,983,482,-1242,482,133,482,-717,482,658,482,1183,482,-1042,481,333,481,859,481,9,481,1384,481,-841,481,534,480,1059,480,-1166,480,209,480,735,479,1260,479,-965,479,410,479,935,479,85,478,-764,478,611,478,1136,478,-1089,478,286,478,-564,477,811,477,1337,477,-888,477,487,477,1012,477,-1213,476,162,476,-688,476,687,476,1213,476,-1012,476,363,475,888,475,38,475,-812,475,563,474,1089,474,-1136,474,239,474,764,474,1289,473,-936,473,439,473,965,473,115,473,-735,472,640,472,1165,472,-1060,472,315,472,-534,472,841,471,-9,471,1366,471,-859,471,516,471,1041,471,-1184,471,191,470,-658,470,717,470,1242,470,-983,470,392,469,917,469,67,469,-782,469,593,469,1118,468,-1107,468,268,468,793,468,1318,468,-906,468,469,467,994,467,-1231,467,144,467,-706,467,669,466,1194,466,-1030,466,345,466,870,466,20,465,-830,465,545,465,1070,465,-1154,465,221,465,746,464,1271,464,-954,464,421,464,947,463,97,463,-753,463,622,463,1147,463,-1078,463,297,462,823,462,1348,462,-877,462,498,462,1023,461,-1202,461,173,461,-677,461,699,461,1224,461,-1001,460,899,460,49,460,-801,460,575,459,1100,459,-1125,459,250,459,-600,459,775,459,1300,458,-925,458,451,458,976,458,126,458,-724,458,651,457,1176,457,-1049,457,852,456,2,456,-848,456,527,456,1052,456,-1173,456,203,455,728,455,1253,455,-972,455,403,455,928,454,79,454,-771,454,604,454,1129,454,-1096,454,279,453,804,453,1330,453,-895,453,480,452,1005,452,-1220,452,155,452,-695,452,680,452,1206,451,-1019,451,356,451,881,451,31,451,-819,451,556,450,1082,450,-1143,450,232,450,757,449,1282,449,-943,449,432,449,958,449,108,449,-742,448,633,448,1158,448,-1067,448,834,447,1359,447,-866,447,509,447,1034,447,-1191,447,184,446,710,446,1235,446,-990,446,385,446,910,445,60,445,-789,445,586,445,1111,445,-1114,445,261,444,786,444,1312,444,-913,444,462,443,987,443,-1238,443,-713,443,662,443,1188,443,-1037,442,863,442,13,442,-837,442,538,441,1064,441,-1161,441,214,441,739,441,1264,440,-961,440,414,440,940,440,-760,440,615,439,1140,439,-1085,439,816,438,1341,438,-884,438,491,438,1016,438,-1209,438,166,437,692,437,1217,437,-1008,437,892,436,42,436,1417,436,-807,436,568,436,1093,436,-1132,436,243,435,768,435,-82,435,1293,435,-931,435,444,435,969,434,119,434,-731,434,644,434,1169,434,-1055,433,845,433,-5,433,-855,433,520,433,1045,432,-1179,432,196,432,721,432,1246,432,-979,431,922,431,1447,431,-778,431,597,430,1122,430,-1103,430,272,430,798,430,-52,430,-902,429,473,429,998,429,-1227,429,674,428,1199,428,-1026,428,874,428,24,428,-826,427,550,427,1075,427,-1150,427,225,427,750,426,1275,426,-950,426,426,426,951,425,-749,425,626,425,1151,425,-1074,425,827,424,-23,424,-873,424,502,424,1027,424,-1198,423,703,423,1228,423,-997,423,903,422,1429,422,-796,422,579,422,1104,422,-1121,422,254,421,779,421,-70,421,-920,421,455,421,980,420,130,420,-720,420,655,420,1181,420,-1044,419,856,419,6,419,-844,419,531,419,1057,418,-1168,418,207,418,732,418,1257,418,-968,417,933,417,-767,417,608,416,1133,416,-1092,416,809,416,-41,416,-891,416,484,415,1009,415,-1216,415,685,414,1210,414,-1015,414,360,414,885,414,1411,414,-814,414,561,413,1086,413,-1139,413,236,413,761,412,1287,412,-938,412,437,412,962,412,-738,412,637,411,1163,411,-1062,411,313,411,838,411,-12,410,-862,410,513,410,1039,410,-1186,410,714,409,1239,409,-986,409,389,409,915,408,-785,408,590,408,1115,408,-1110,408,265,408,791,407,-59,407,-909,407,466,407,991,407,-1234,406,667,406,1192,406,-1033,406,342,406,867,405,-832,405,543,405,1068,405,-1157,405,218,404,743,404,1268,404,-956,404,419,404,944,403,94,403,-756,403,619,403,1144,403,-1080,403,295,402,820,402,-30,402,-880,402,495,402,1020,402,-1204,401,696,401,1221,401,-1004,401,371,400,897,400,-803,400,572,400,1097,400,-1128,399,773,399,-77,399,-927,399,448,398,973,398,649,398,1174,398,-1051,397,324,397,849,397,-851,397,525,396,1050,396,-1175,396,725,396,-975,396,401,395,926,395,-774,395,601,395,1126,394,-1099,394,277,394,802,394,-48,394,-898,394,477,393,1002,393,-1223,393,678,392,-1022,392,353,392,878,392,1404,392,-821,392,554,391,1079,391,-1146,391,229,391,754,391,-945,390,430,390,955,390,630,389,1156,389,-1069,389,306,389,831,389,-19,389,-869,389,506,388,1032,388,-1193,388,707,387,-993,387,382,387,908,387,-792,387,583,386,1108,386,-1117,386,784,386,-66,385,-916,385,459,385,984,385,660,384,-1040,384,335,384,860,384,-839,383,536,383,1061,383,-1164,383,211,383,736,382,1262,382,-963,382,412,382,937,382,612,381,1138,381,-1087,381,288,381,813,381,-37,380,-887,380,488,380,1014,380,-1211,380,689,379,-1011,379,364,379,890,379,-810,378,565,378,1090,378,-1135,378,240,378,766,378,-84,377,-934,377,441,377,966,377,642,376,1167,376,-1058,376,317,376,842,375,-857,375,518,375,1043,375,-1182,375,718,374,-981,374,394,374,919,374,-781,374,594,373,1119,373,-1105,373,795,373,-55,372,-905,372,470,372,995,372,146,372,671,371,1196,371,-1029,371,346,371,872,371,1397,371,-828,370,547,370,1072,370,-1153,370,222,370,748,369,1273,369,-952,369,423,369,948,369,98,369,624,368,1149,368,-1076,368,299,368,824,367,-876,367,500,367,1025,367,-1200,367,700,366,-1000,366,376,366,901,366,51,366,-799,366,576,365,1101,365,-1124,365,777,364,-923,364,452,364,977,364,653,363,1178,363,-1047,363,328,363,853,363,1379,363,-846,363,529,362,1054,362,-1171,362,729,361,-970,361,405,361,930,361,80,361,-770,361,605,360,1131,360,-1094,360,806,360,-894,359,481,359,1007,359,682,358,-1018,358,883,358,33,358,1408,358,-817,358,558,357,1083,357,-1142,357,759,357,1284,357,-941,356,434,356,959,356,109,356,635,356,1160,355,-1065,355,835,355,1361,355,-864,355,511,354,1036,354,-1189,354,711,354,-988,353,387,353,912,353,62,353,-788,353,587,353,1113,352,-1112,352,263,352,788,352,-912,352,463,351,989,351,664,351,1189,351,-1036,351,339,350,865,350,15,350,1390,350,-835,350,540,350,1065,349,-1160,349,741,349,1266,349,-959,349,416,348,941,348,91,348,617,348,1142,348,-1083,347,817,347,-33,347,1342,347,-882,347,493,347,1018,346,693,346,-1006,346,369,345,894,345,44,345,-806,345,569,345,1094,345,-1130,344,770,344,-930,344,445,344,970,343,646,343,1171,343,-1054,343,847,342,-3,342,-853,342,522,342,1047,342,-1178,341,723,341,-977,341,398,341,923,341,73,340,599,340,1124,340,-1101,340,799,339,-51,339,1324,339,-901,339,475,339,1000,338,675,338,1200,338,-1025,338,876,338,26,337,-824,337,551,337,1076,337,-1149,337,752,336,-948,336,427,336,952,336,103,336,628,335,1153,335,-1072,335,828,335,-21,334,-871,334,504,334,1029,334,704,333,-995,333,380,333,905,333,55,333,-795,333,580,332,1106,332,-1119,332,781,332,-69,332,1306,332,-919,331,456,331,982,331,657,331,1182,330,-1043,330,858,330,8,330,-842,330,533,329,1058,329,-1167,329,734,329,-966,329,409,328,934,328,84,328,610,328,1135,328,-1090,327,810,327,-40,327,-889,327,486,327,1011,326,686,326,-1013,326,362,325,887,325,37,325,-813,325,562,325,1088,325,-1137,324,763,324,-87,324,-937,324,438,324,964,323,114,323,639,323,1164,323,-1061,323,840,322,-10,322,-860,322,515,322,1040,321,716,321,-984,321,391,321,916,321,66,320,592,320,1117,320,-1108,320,792,320,-58,319,-907,319,468,319,993,319,143,319,668,318,1193,318,-1031,318,869,318,19,318,-831,317,544,317,1069,317,-1155,317,220,317,745,316,-955,316,420,316,945,316,96,316,621,315,1146,315,-1079,315,822,315,-28,315,-878,315,497,314,1022,314,698,314,-1002,314,373,313,898,313,48,313,574,313,1099,313,-1126,312,249,312,774,312,-76,312,-926,312,450,312,975,311,125,311,650,311,1175,311,-1050,311,326,310,851,310,1,310,-849,310,526,310,1051,310,202,309,727,309,-973,309,402,309,927,309,78,308,603,308,1128,308,-1097,308,278,308,803,307,-46,307,-896,307,479,307,1004,307,154,307,679,306,1205,306,-1020,306,355,306,880,306,30,306,-820,305,555,305,1081,305,231,305,756,305,-94,304,-944,304,431,304,957,304,107,304,632,303,1157,303,-1068,303,307,303,833,303,-17,303,508,302,1033,302,183,302,709,302,-991,302,384,301,909,301,59,301,585,301,1110,301,-1115,300,260,300,785,300,-65,300,-914,300,461,300,986,299,136,299,661,299,1187,299,-1038,299,337,298,862,298,12,298,537,298,1063,298,213,297,738,297,-962,297,413,297,939,297,89,296,614,296,1139,296,-1086,296,289,296,815,296,-35,295,1015,295,165,295,691,294,1216,294,-1009,294,366,294,891,294,41,294,567,293,1092,293,242,293,767,293,-83,292,443,292,968,292,118,292,643,292,1168,291,-1056,291,319,291,844,291,-6,291,519,290,1044,290,195,290,720,290,-980,290,395,289,920,289,71,289,596,289,1121,289,-1104,289,271,288,797,288,-53,288,472,288,997,288,147,287,673,287,1198,287,-1027,287,873,286,23,286,-827,286,549,286,1074,286,224,286,749,285,-101,285,425,285,950,285,100,285,625,284,1150,284,-1075,284,301,284,826,284,-24,283,1026,283,177,283,702,282,-998,282,377,282,902,282,53,282,578,282,1103,281,253,281,778,281,-71,281,454,280,979,280,129,280,654,280,1180,280,-1045,280,330,279,855,279,5,279,530,279,1056,279,206,278,731,278,-119,278,406,278,932,278,82,277,607,277,1132,277,-1093,277,282,277,808,276,-42,276,483,276,1008,276,158,276,684,275,-1016,275,359,275,884,275,34,275,-815,275,560,274,1085,274,-1140,274,235,274,760,274,-90,274,1286,274,436,273,961,273,111,273,636,273,1162,273,-1063,272,312,272,837,272,-13,272,1038,271,188,271,713,271,-987,271,388,271,914,270,64,270,589,270,1114,270,264,269,790,269,-60,269,465,269,990,269,140,268,666,268,1191,268,-1034,268,866,268,16,267,542,267,1067,267,217,267,742,267,-108,266,418,266,943,266,93,266,618,265,1143,265,-1081,265,294,265,819,265,-31,265,494,264,1019,264,170,264,695,264,-1005,264,370,263,896,263,46,263,-804,263,1096,263,246,262,772,262,-78,262,447,262,972,262,122,261,648,261,1173,261,-1052,261,323,261,848,261,-2,260,1049,260,199,260,724,259,-126,259,-976,259,400,259,925,259,75,259,600,258,1125,258,276,258,801,258,-49,258,476,257,1001,257,152,257,677,257,-1023,256,877,256,28,256,1078,256,228,255,753,255,-96,255,429,255,954,254,104,254,629,254,1155,254,-1070,254,305,254,830,253,-20,253,1031,253,181,253,706,252,-144,252,-994,252,381,252,907,252,57,251,1107,251,-1118,251,257,251,783,251,-67,251,458,250,983,250,133,250,1184,250,-1041,249,334,249,859,249,9,249,1060,248,210,248,735,248,-115,248,411,248,936,247,86,247,1137,247,287,247,812,246,-38,246,487,246,1013,246,163,246,688,245,1213,245,-1012,245,889,245,39,245,564,244,1089,244,239,244,765,244,-85,244,440,243,965,243,115,243,1166,243,-1059,242,316,242,841,242,-9,242,517,242,1042,241,192,241,717,241,-133,241,-982,241,393,241,918,240,68,240,1118,240,-1106,240,269,240,794,239,-56,239,469,239,994,239,145,238,-1030,238,345,238,871,238,21,238,546,237,1071,237,221,237,747,237,-103,237,422,236,947,236,97,236,1148,236,298,235,823,235,-27,235,499,235,1024,234,174,234,699,234,-151,234,-1001,234,900,233,50,233,575,233,1100,233,251,233,776,232,-74,232,451,232,976,232,127,231,-1048,231,327,231,852,231,3,231,528,230,1053,230,203,230,728,230,-121,230,404,229,929,229,79,229,1130,229,280,228,805,228,-45,228,480,228,1006,228,156,227,1206,227,-1019,227,356,227,882,227,32,226,557,226,1082,226,232,226,758,226,-92,225,433,225,958,225,108,224,309,224,834,224,-16,224,510,223,1035,223,185,223,710,223,-140,223,-989,222,911,222,61,222,-789,222,586,222,1112,222,262,221,787,221,-63,221,462,221,988,221,138,220,-1037,220,338,220,864,220,14,219,539,219,1064,219,214,219,740,219,-110,218,415,218,940,218,90,217,291,217,816,217,-34,217,492,217,1017,216,167,216,-158,216,-1007,216,368,215,43,215,568,215,1093,215,244,215,769,214,-81,214,444,214,969,214,120,213,-1580,213,320,213,846,213,-4,213,521,212,1046,212,196,212,-128,212,-978,212,397,211,922,211,72,211,-778,211,273,210,798,210,-52,210,-902,210,474,210,999,210,149,209,-1026,209,350,209,25,208,550,208,226,208,751,208,-99,207,426,207,951,207,102,206,302,206,827,206,-22,206,-872,206,503,206,1028,205,178,205,-146,205,-996,204,54,204,579,204,1105,204,255,204,780,203,-70,203,455,203,981,203,131,202,-1044,202,331,202,857,202,7,202,532,201,1057,201,207,201,733,201,-117,201,-967,201,408,200,83,200,-766,200,284,199,809,199,-41,199,-890,199,485,199,1010,199,160,198,-1014,198,361,198,36,197,561,197,237,197,762,197,-88,196,437,196,963,196,113,195,313,195,839,195,-11,195,514,195,1039,194,189,194,-135,194,-985,193,65,193,266,193,791,192,-59,192,-908,192,467,192,992,192,142,192,-708,192,-1558,191,-1032,191,343,191,18,191,543,190,219,190,744,190,-106,190,419,189,944,189,95,189,295,188,821,188,-29,188,-879,188,496,188,1021,188,171,187,-153,187,-1003,187,372,187,47,186,1098,186,248,186,773,186,-77,186,-927,185,449,185,974,185,124,185,-726,184,325,184,0,184,525,184,1050,183,201,183,-649,183,-124,183,-974,183,77,182,-773,182,277,182,802,182,-47,181,-897,181,478,181,1003,181,153,180,-1021,180,354,180,29,180,554,179,230,179,755,179,-95,179,-945,179,430,179,956,178,106,178,306,178,832,177,-18,177,507,177,1032,177,182,176,-142,176,-992,176,383,176,58,175,259,175,784,175,-66,175,-915,175,460,174,985,174,135,174,336,173,11,173,536,173,1062,173,212,172,737,172,-113,172,-963,172,88,171,288,171,814,171,-36,171,-886,170,489,170,1014,170,164,170,-160,170,1215,170,365,169,40,169,241,168,766,168,-84,168,-933,168,442,168,967,168,117,167,318,167,-7,166,518,166,1043,166,194,166,-131,165,-981,165,70,164,270,164,796,164,-54,164,-904,164,471,164,996,163,146,163,347,162,22,162,1073,162,223,162,748,162,-102,161,949,161,99,160,300,160,-25,160,500,160,1025,159,176,159,-149,159,376,158,52,158,252,158,777,157,-72,157,-922,157,453,157,978,157,128,156,329,156,4,156,-846,155,1055,155,205,155,-120,154,81,154,281,153,-43,153,-893,153,482,153,1007,153,157,152,-167,152,1208,152,358,152,33,151,1084,151,234,151,759,151,-91,151,435,150,110,150,311,149,-14,149,-864,149,1037,149,187,148,-138,148,387,148,63,147,263,147,789,147,-61,147,-911,147,464,146,989,146,139,146,340,145,15,145,-834,145,1066,145,216,144,-109,144,92,143,293,143,-32,143,-882,142,1018,142,169,142,-156,141,369,141,45,141,245,140,771,140,-79,140,446,140,121,139,322,139,-3,138,-853,138,1048,138,198,138,-127,137,399,137,74,136,275,136,800,136,-50,136,1000,136,151,135,351,135,27,134,1077,134,227,134,752,134,-97,133,103,132,304,132,-21,132,-871,132,1030,131,180,131,-145,131,1230,131,380,131,56,130,256,130,782,130,-68,129,132,128,333,128,8,128,-841,128,1059,127,209,127,-116,127,410,126,85,126,286,126,-39,125,162,125,-163,124,1212,124,362,124,38,124,1088,123,238,123,764,123,-86,122,114,122,315,121,-10,121,-859,121,1041,121,191,121,-134,120,392,120,67,119,268,119,793,119,-57,119,993,118,144,118,344,117,20,117,1070,117,220,117,-104,116,421,116,96,115,297,115,-28,114,173,114,-152,114,1223,114,374,113,49,113,250,113,775,112,-75,112,126,112,-724,111,326,111,2,111,-848,111,1052,110,202,110,-122,110,403,109,78,109,279,108,-46,108,479,108,155,108,-695,107,355,107,31,106,231,106,-93,106,432,105,107,105,-742,105,308,104,-17,104,509,104,184,104,-666,104,-141,103,385,103,60,102,261,102,786,102,-64,102,461,101,137,101,337,100,13,100,-837,100,1063,100,213,100,-636,100,-111,99,414,99,89,98,290,98,-35,98,491,97,166,97,-684,97,367,96,42,96,243,96,768,96,-82,95,443,95,119,95,-731,94,319,94,-5,93,195,93,-655,93,-129,93,396,92,71,92,272,92,-53,91,473,91,998,91,148,91,-702,90,349,90,24,90,-826,89,225,89,-625,89,-100,89,425,88,101,88,-749,88,301,88,-23,87,502,87,177,87,-673,86,378,86,53,85,254,85,779,85,-71,85,454,84,130,84,-720,84,330,84,6,83,206,83,-643,83,-118,83,1257,82,407,82,82,82,-767,81,283,81,808,81,-42,81,484,81,159,80,-691,80,360,80,35,79,-815,79,236,79,-614,79,-89,78,436,78,112,78,-738,77,312,77,-12,77,188,76,-661,76,389,76,64,75,265,75,-60,74,466,74,141,74,-709,74,342,73,17,73,218,72,-632,72,-107,72,418,72,94,71,-756,71,294,71,-30,70,170,70,-680,70,1221,70,371,69,46,69,247,68,-603,68,-78,68,448,68,123,68,-727,67,324,67,-1,66,200,66,-650,66,1250,66,400,65,76,65,276,64,801,64,-48,64,477,64,1002,64,152,64,-698,63,353,62,229,62,-621,62,-96,62,429,61,105,61,-745,61,305,60,-19,60,181,60,-668,59,382,59,57,58,258,58,-592,58,-67,58,459,57,134,57,-716,57,1185,57,335,56,211,56,-639,55,411,55,87,55,-763,54,287,54,-562,54,-37,53,1013,53,163,53,-686,53,364,52,240,52,-610,51,-85,51,441,51,966,51,116,51,-734,50,1166,50,317,50,-533,49,193,49,-657,49,393,48,69,48,269,48,-581,47,470,47,145,47,-705,46,346,45,222,45,-628,45,423,44,98,44,-752,44,1148,44,299,44,-551,43,1024,43,175,43,-675,42,375,41,251,41,-599,41,452,41,977,41,127,40,-723,40,328,40,-522,39,204,39,-646,38,404,38,-770,38,280,37,-569,37,156,36,-693,36,357,35,233,35,-617,35,434,34,109,34,-741,34,1160,34,310,33,-540,33,186,32,-664,32,386,31,262,31,-587,31,463,30,988,30,138,30,-711,30,339,29,-511,29,215,29,-635,28,416,28,-759,27,1141,27,292,27,-558,26,1017,26,168,26,-682,26,368,25,244,25,-606,24,445,24,120,24,-730,23,1171,23,321,23,-529,22,197,22,-653,22,398,21,-777,21,1123,21,274,21,-576,20,999,20,150,20,-700,19,350,18,226,18,-624,18,1277,18,427,17,102,17,-748,17,1153,17,303,17,-547,16,179,16,-671,15,379,15,1105,14,255,14,-594,14,131,13,-718,13,1182,13,332,13,-518,12,208,12,-642,11,409,11,-766,11,1135,10,285,10,-565,10,1011,10,161,9,-689,9,1211,9,361,8,237,8,-612,7,113,7,-736,7,1164,7,314,6,-536,6,190,5,-660,5,1240,5,391,5,-784,4,1116,4,267,4,-583,3,992,3,143,3,-707,3,343,2,219,2,-631,1,420,1,95,1,-755,0,1146,0,296,0,-554,-1,1022,-1,172,-1,-678,-1,373,-2,-802,-2,1098,-2,249,-2,-601,-3,125,-3,-725,-4,1175,-4,325,-4,-525,-5,201,-5,-649,-5,402,-6,-773,-6,1128,-6,278,-6,-572,-7,1328,-7,1004,-7,154,-7,-696,-8,354,-8,-495,-9,230,-9,-619,-10,106,-10,-743,-10,1157,-10,307,-10,-543,-11,1033,-11,183,-11,-667,-12,384,-12,-466,-12,-791,-12,1110,-13,260,-13,-590,-13,1310,-14,136,-14,-714,-14,336,-14,-514,-15,212,-15,-637,-16,413,-16,-761,-16,1139,-17,289,-17,-561,-17,1339,-17,1015,-17,165,-18,-685,-18,1215,-18,366,-18,-484,-19,242,-19,-608,-20,118,-20,-732,-20,318,-21,-532,-21,1044,-21,194,-22,-656,-22,395,-22,-455,-22,-780,-23,1121,-23,271,-23,-579,-24,147,-24,-703,-24,1197,-24,348,-25,-502,-25,1398,-25,224,-25,-626,-26,100,-26,-750,-27,1150,-27,300,-27,-550,-28,1026,-28,176,-28,-674,-28,377,-28,-473,-29,-798,-29,1103,-29,253,-29,-597,-30,1303,-30,129,-30,-721,-31,329,-31,-520,-31,1380,-32,1055,-32,205,-32,-644,-32,-444,-33,-768,-33,282,-33,-568,-34,1333,-34,158,-34,-692,-35,359,-35,-491,-35,1409,-36,235,-36,-615,-36,1285,-36,-415,-37,111,-37,-739,-37,1161,-37,311,-37,-539,-38,1362,-38,1037,-38,187,-38,-662,-39,388,-39,-462,-39,1438,-39,-786,-40,264,-40,-586,-40,-385,-41,140,-41,-710,-41,341,-41,-509,-42,1391,-42,217,-42,-633,-43,-433,-43,-757,-44,293,-44,-557,-44,169,-45,-681,-45,1220,-45,370,-45,-480,-45,1420,-46,-805,-46,246,-46,-604,-47,-403,-47,122,-47,-728,-48,323,-48,-527,-48,1373,-48,1048,-48,199,-49,-651,-49,-451,-49,1450,-50,-775,-50,275,-50,-575,-51,-374,-51,151,-51,-699,-51,1202,-51,352,-52,-498,-52,1402,-52,228,-53,-622,-53,-421,-53,-746,-54,304,-54,-545,-55,180,-55,-669,-55,381,-56,-469,-56,1432,-56,-793,-56,257,-56,-593,-57,-392,-57,133,-57,1508,-57,-717,-58,334,-58,-516,-58,1384,-59,210,-59,-640,-60,-440,-60,1461,-60,-764,-60,286,-60,-564,-61,-363,-61,162,-61,-687,-62,363,-62,-487,-62,1413,-63,239,-63,-611,-63,-410,-64,-735,-64,316,-64,-534,-65,192,-65,-658,-66,-458,-66,1443,-66,-782,-67,268,-67,-582,-67,-381,-68,144,-68,-706,-68,345,-68,-505,-69,1395,-69,1071,-69,221,-69,-629,-70,-428,-70,-753,-71,298,-71,-552,-71,-352,-72,174,-72,-676,-72,374,-72,-476,-73,1425,-73,1100,-73,250,-73,-600,-74,-399,-74,-724,-75,327,-75,-523,-76,203,-76,-647,-76,-446,-77,1454,-77,-771,-77,1129,-77,279,-77,-570,-78,-370,-78,155,-78,-694,-79,356,-79,-494,-79,1407,-80,232,-80,-618,-80,-417,-81,-742,-81,309,-81,-541,-82,185,-82,-665,-82,1235,-83,385,-83,-465,-83,-789,-84,261,-84,-589,-84,-388,-84,137,-85,-712,-85,1188,-85,338,-85,-512,-86,214,-86,-636,-86,1264,-87,-435,-87,1465,-87,-760,-88,291,-88,-559,-88,-359,-88,167,-89,-683,-89,367,-89,-483,-89,1418,-90,243,-90,-607,-91,-406,-91,-731,-92,320,-92,-530,-92,196,-93,-654,-93,1246,-93,-453,-94,-778,-94,273,-94,-577,-95,-377,-95,149,-95,-701,-95,1199,-96,349,-96,-501,-96,225,-97,1600,-97,-625,-97,-424,-97,1476,-98,-749,-98,302,-98,-548,-99,178,-99,-672,-100,378,-100,-471,-100,254,-101,-595,-101,-395,-102,-719,-102,331,-102,-519,-103,207,-103,-643,-104,-442,-104,-767,-104,284,-105,-566,-105,-366,-105,160,-106,-690,-106,360,-106,-490,-107,236,-107,-614,-108,-413,-108,-737,-108,313,-109,-537,-109,189,-110,-661,-110,390,-110,-460,-111,266,-111,-584,-112,-384,-112,142,-112,-708,-112,342,-113,-508,-113,218,-114,-632,-114,-431,-115,-756,-115,295,-115,-555,-116,171,-116,-679,-117,372,-117,-478,-117,1422,-117,248,-118,-602,-118,-402,-119,-726,-119,324,-119,-526,-120,200,-120,-650,-121,401,-121,-449,-121,277,-122,-573,-122,1327,-122,153,-123,-697,-123,353,-123,-496,-124,229,-124,-620,-125,-420,-125,-744,-126,306,-126,-544,-126,1357,-126,182,-127,-668,-127,383,-127,-467,-127,1433,-128,259,-128,-591,-128,1309,-129,-391,-129,135,-129,-715,-130,335,-130,-515,-131,211,-131,-639,-131,-438,-132,-762,-132,288,-132,-562,-132,1338,-133,489,-133,164,-133,-686,-134,365,-134,-485,-135,241,-135,-609,-135,-409,-136,-733,-136,317,-136,-533,-137,193,-137,-657,-138,394,-138,-456,-139,270,-139,-580,-139,1320,-140,146,-140,-704,-140,347,-140,-503,-141,223,-141,-627,-142,1273,-142,-427,-142,-751,-143,299,-143,1674,-143,-551,-143,1350,-143,500,-144,175,-144,-675,-144,376,-144,-474,-145,1426,-145,252,-145,-598,-146,1302,-146,-397,-146,128,-146,-722,-147,328,-147,-521,-148,204,-148,-645,-148,1255,-148,405,-148,-445,-149,281,-149,-569,-150,1332,-150,482,-150,157,-150,-693,-151,358,-151,-492,-152,234,-152,-616,-152,1284,-153,-416,-153,-740,-153,310,-153,-540,-154,1361,-154,186,-154,-664,-155,387,-155,-463,-155,1437,-156,263,-156,-587,-156,1313,-156,464,-157,139,-157,-711,-157,340,-158,-510,-158,216,-159,-634,-159,1266,-159,-434,-160,292,-160,-558,-160,1343,-161,493,-161,168,-161,-682,-162,369,-162,-481,-162,1419,-162,245,-163,-605,-163,1295,-163,446,-163,-404,-163,121,-164,-729,-164,322,-164,-528,-165,1372,-165,198,-165,-652,-165,1248,-166,-452,-166,1449,-167,274,-167,-576,-167,1325,-167,475,-168,150,-168,-700,-168,351,-168,-499,-169,227,-169,-623,-170,1277,-170,-422,-171,303,-171,-546,-171,1354,-172,179,-172,-670,-172,1230,-172,380,-172,-470,-173,1431,-173,256,-173,-594,-174,1307,-174,457,-174,-393,-174,132,-175,333,-175,-517,-175,1383,-176,209,-176,-641,-176,1259,-176,1784,-177,-441,-177,1460,-177,285,-178,-565,-178,1336,-178,486,-178,161,-179,-689,-179,362,-179,-488,-179,1412,-180,238,-180,-612,-180,1288,-181,-411,-182,315,-182,-535,-182,1365,-183,191,-183,-659,-183,1241,-183,-459,-184,1442,-184,267,-184,-583,-185,1318,-185,468,-185,143,-186,344,-186,-506,-186,1394,-187,220,-187,-630,-187,1270,-187,-429,-188,297,-188,-553,-189,1347,-189,173,-189,-677,-190,1223,-190,-477,-190,1424,-191,249,-191,-601,-191,1300,-191,450,-192,-400,-192,326,-193,-524,-193,1376,-193,202,-194,-648,-194,1252,-194,-447,-194,1453,-195,278,-195,-571,-195,1329,-196,479,-196,154,-196,-695,-197,-495,-197,1406,-198,231,-198,-619,-198,1282,-198,-418,-199,308,-199,-542,-200,1358,-200,184,-200,-666,-201,1234,-201,-466,-201,1435,-202,260,-202,-590,-202,1311,-202,461,-203,136,-203,1187,-203,337,-204,-513,-204,1387,-204,213,-205,-637,-205,1263,-205,-436,-205,1464,-206,290,-206,-560,-206,1340,-207,166,-207,-684,-207,1216,-208,-484,-208,1417,-209,242,-209,-608,-209,1293,-209,443,-210,1169,-210,319,-210,-531,-211,1369,-211,195,-211,-655,-212,1245,-212,-454,-212,1446,-213,272,-213,-578,-213,1322,-213,472,-214,148,-214,1198,-214,348,-215,-502,-215,1399,-215,224,-216,-626,-216,1275,-216,-425,-217,1475,-217,1151,-217,301,-217,-549,-218,1351,-218,177,-218,-673,-219,1227,-219,-472,-219,1428,-220,253,-220,-596,-220,1304,-220,454,-221,1180,-221,330,-221,-520,-222,1381,-222,206,-222,-644,-223,1257,-223,-443,-223,1457,-224,283,-224,-567,-224,1333,-225,159,-225,-691,-225,1209,-226,-491,-226,1410,-227,235,-227,-615,-227,1286,-227,436,-228,1486,-228,1162,-228,312,-228,-538,-229,1362,-229,188,-229,-662,-230,1238,-230,-461,-230,1439,-231,265,-231,-585,-231,1315,-231,465,-232,1191,-232,341,-233,-509,-233,1392,-233,217,-234,-633,-234,1268,-235,1468,-235,1144,-235,294,-235,-556,-236,1344,-236,170,-236,-680,-237,1220,-237,-479,-237,1421,-238,247,-238,-603,-238,1297,-238,447,-239,1498,-239,1173,-239,323,-240,-527,-240,1374,-240,199,-241,-651,-241,1250,-242,1450,-242,276,-242,-574,-243,1326,-243,152,-243,-698,-244,1202,-244,352,-244,-497,-244,1403,-245,228,-245,-621,-245,1279,-246,1480,-246,1155,-246,305,-247,-545,-247,1356,-247,181,-248,-669,-248,1232,-249,1432,-249,258,-249,-592,-250,1308,-250,458,-250,1509,-251,1184,-251,334,-251,-516,-251,1385,-252,210,-252,-640,-252,1261,-253,1461,-253,287,-254,-563,-254,1337,-254,163,-255,-687,-255,1213,-255,-486,-256,1414,-256,240,-256,-610,-257,1290,-257,1491,-258,1166,-258,316,-258,-534,-258,1367,-259,192,-259,-658,-259,1243,-260,1443,-261,269,-261,-581,-261,1319,-262,1520,-262,-705,-262,1195,-262,-504,-263,1396,-263,222,-263,-628,-264,1272,-264,1473,-265,1148,-265,298,-265,-552,-265,1349,-266,174,-266,-676,-266,1225,-267,1425,-268,251,-268,-599,-268,1301,-269,1502,-269,1177,-269,327,-269,-522,-270,1378,-270,203,-271,-646,-271,1254,-271,1455,-272,280,-272,-570,-273,1331,-273,156,-273,-694,-274,1207,-274,-493,-274,1407,-275,233,-275,-617,-275,1283,-276,1484,-276,1159,-276,309,-277,-541,-277,1360,-278,185,-278,-665,-278,1236,-279,1436,-279,262,-279,-588,-280,1312,-280,1513,-281,1188,-281,-511,-281,1389,-282,215,-282,-635,-282,1265,-283,1466,-284,291,-284,-559,-284,1342,-285,167,-285,-683,-285,1218,-286,1418,-286,244,-287,-606,-287,1294,-288,1495,-288,1170,-288,321,-288,-529,-289,1371,-289,197,-289,-653,-290,1247,-290,1448,-291,273,-291,-577,-291,1324,-292,1524,-292,-701,-293,1200,-293,-500,-293,1400,-294,226,-294,-624,-294,1276,-295,1477,-295,1152,-296,302,-296,-547,-296,1353,-297,178,-297,-671,-297,1229,-298,1430,-298,255,-298,-595,-299,1306,-299,1506,-300,1182,-300,-518,-301,1382,-301,208,-301,-642,-302,1258,-302,1459,-303,284,-303,-566,-303,1335,-304,-690,-304,1211,-305,1411,-306,237,-306,-613,-306,1287,-307,1488,-307,1163,-308,-536,-308,1364,-309,190,-309,-660,-309,1240,-310,1441,-310,266,-310,-584,-311,1317,-311,1517,-312,-708,-312,1193,-313,1393,-313,219,-313,-631,-314,1269,-314,1470,-315,296,-315,-554,-315,1346,-316,-678,-316,1222,-317,1423,-318,248,-318,-602,-319,1499,-319,1175,-320,-525,-320,1375,-321,201,-321,-649,-321,1251,-322,1452,-322,277,-323,-572,-324,-696,-324,1204,-325,1405,-325,230,-325,-620,-326,1481,-327,1157,-327,-543,-328,1357,-328,183,-328,-667,-329,1233,-329,1434,-330,259,-330,-591,-331,1510,-331,-715,-332,1186,-332,1386,-333,212,-333,-638,-334,1463,-335,-561,-336,-685,-336,1215,-337,1416,-338,241,-338,-609,-339,1492,-339,1168,-341,194,-341,-656,-342,1445,-343,-579,-344,-703,-345,1398,-345,-627,-347,1474,-347,-550,-348,-674,-349,1427,-350,-597,-351,1504,-351,-721,-353,-645,-354,1456,-356,-692,-357,1409,-358,-616,-359,1485,-361,-663,-362,1438,-363,-586,-364,-710,-366,-634,-367,1467,-369,-681,-370,1420,-371,-604,-372,1497,-372,-728,-374,-652,-375,1449,-376,-575,-377,-699,-379,-622,-382,-670,-383,1756,-383,1431,-384,-593,-385,-717,-387,-641,-388,1460,-390,-688,-395,-659,-396,1767,-398,-706,-400,-629,-404,-677,-407,-724,-410,1454,-412,-695,-417,-666,-421,-713,-424,1465,-426,-684,-431,-654,-435,-702,-435,1724,-440,-672,-443,-720,-444,1706,-449,-691,-452,-738,-453,1688,-458,-709,-464,-679,-467,-727,-473,-697,-477,-745,-479,-668,-483,-716,-488,-686,-489,689,-492,-734,-498,-704,-508,-722,-514,-693,-525,-711,-535,-729,-549,-671];
+const SITES = [[4.7,96.9,0],[0.5,101.4,1],[-6.9,107.5,0],[-8.1,115.1,0],[-8.5,115.1,0],[-8.8,121.6,1]];
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cur: 'idr' };
+    this.canvas = null;
+    this.raf = 0;
+    this.globeRef = (el) => { this.canvas = el; };
+  }
+  componentDidMount() {
+    const reduce = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    const loop = (now) => {
+      this.drawGlobe((now - t0) / 1000);
+      if (!reduce) this.raf = requestAnimationFrame(loop);
+    };
+    this.raf = requestAnimationFrame(loop);
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this.raf);
+  }
+  drawGlobe(t) {
+    const c = this.canvas;
+    if (!c) return;
+    const w = c.clientWidth, h = c.clientHeight;
+    if (!w || !h) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+      c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    }
+    const ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    const accent = this.accentColor || '#3DDC84';
+    const R = Math.min(w, h) * 0.47, cx = w / 2, cy = h / 2;
+    const D = Math.PI / 180;
+    const lon0 = (115 - t * 7) * D;
+    const tilt = 12 * D, ct = Math.cos(tilt), st = Math.sin(tilt);
+    const proj = (lat, lon) => {
+      const la = lat * D, l = lon * D - lon0;
+      const x = Math.cos(la) * Math.sin(l), y = Math.sin(la), z = Math.cos(la) * Math.cos(l);
+      return [cx + x * R, cy - (y * ct - z * st) * R, y * st + z * ct];
+    };
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1; ctx.stroke();
+    const P = LAND;
+    for (let i = 0; i < P.length; i += 2) {
+      const p = proj(P[i] / 10, P[i + 1] / 10);
+      const z = p[2];
+      if (z < 0) {
+        ctx.globalAlpha = 0.05; ctx.fillStyle = '#9AA59F';
+        ctx.fillRect(p[0] - 0.6, p[1] - 0.6, 1.2, 1.2);
+      } else {
+        ctx.globalAlpha = 0.18 + 0.72 * z; ctx.fillStyle = accent;
+        const s = 1 + 0.9 * z;
+        ctx.fillRect(p[0] - s / 2, p[1] - s / 2, s, s);
+      }
+    }
+    for (let i = 0; i < SITES.length; i++) {
+      const m = SITES[i];
+      const p = proj(m[0], m[1]);
+      if (p[2] < 0.05) continue;
+      const col = m[2] ? '#F2A65A' : accent;
+      const ph = ((t * 0.6 + i * 0.17) % 1);
+      ctx.globalAlpha = (1 - ph) * 0.8 * p[2];
+      ctx.strokeStyle = col; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 4 + ph * 14, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = p[2];
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(p[0], p[1], 3.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#3DDC84';
+    this.accentColor = accent;
+    const isIdr = this.state.cur === 'idr';
+    const on = 'font: 600 14px Inter, sans-serif; border: 0; border-radius: 999px; padding: 0 18px; min-height: 40px; cursor: pointer; background: #0D0F0E; color: #FAFAF7';
+    const off = 'font: 500 14px Inter, sans-serif; border: 0; border-radius: 999px; padding: 0 18px; min-height: 40px; cursor: pointer; background: transparent; color: #4A504C';
+    const raw = [
+      { name: 'Pay As You Go', tagline: 'For occasional checks, no commitment.',
+        idr: ['Rp88.200', '/ ha'], usd: ['$4.90', '/ ha'],
+        sub: 'No monthly fee', cta: 'Start pay as you go',
+        features: ['EUDR compliance analysis', 'Review dashboard', 'GeoJSON upload & map draw', 'PDF export'],
+        note: { idr: 'Billed per hectare analyzed.', usd: 'Billed per hectare analyzed.' } },
+      { name: 'Regular', tagline: 'For teams checking plots every month.', dark: true,
+        idr: ['Rp522.000', '/ month'], usd: ['$29', '/ month'],
+        sub: '100 ha included per month', cta: 'Choose Regular',
+        features: ['Everything in Pay As You Go', 'AI insights', '100 ha monthly quota'],
+        note: { idr: 'Extra usage Rp9.000/ha. Quota does not roll over.', usd: 'Extra usage $0.50/ha. Quota does not roll over.' } },
+      { name: 'Professional', tagline: 'For supply-chain intelligence at scale.',
+        idr: ['Rp1.782.000', '/ month'], usd: ['$99', '/ month'],
+        sub: '500 ha included per month', cta: 'Choose Professional',
+        features: ['Everything in Regular', 'Buy & export raw data', 'Supply-chain sustainability insight', 'Insight per business & country'],
+        note: { idr: 'Extra usage Rp4.500/ha. Quota does not roll over.', usd: 'Extra usage $0.25/ha. Quota does not roll over.' } }
+    ];
+    const tiers = raw.map((t) => {
+      const d = !!t.dark;
+      const p = isIdr ? t.idr : t.usd;
+      return {
+        name: t.name, tagline: t.tagline, price: p[0], unit: p[1], sub: t.sub, cta: t.cta, features: t.features,
+        note: isIdr ? t.note.idr : t.note.usd,
+        cardStyle: 'border-radius: 18px; padding: 32px; display: flex; flex-direction: column; gap: 14px; ' + (d ? 'background: #0D0F0E; color: #F2F2EE; border: 1px solid #0D0F0E' : 'background: #FFFFFF; color: #0D0F0E; border: 1px solid #E2E1DA'),
+        mutedStyle: 'margin: 0; font-size: 15px; line-height: 1.5; color: ' + (d ? '#B9BFBB' : '#4A504C'),
+        noteStyle: 'margin: auto 0 0; padding-top: 16px; font-size: 13px; line-height: 1.5; border-top: 1px solid ' + (d ? '#2E3431' : '#ECEBE5') + '; color: ' + (d ? '#A9AFAB' : '#6A706C'),
+        ctaStyle: 'text-decoration: none; text-align: center; font-weight: 600; font-size: 15px; padding: 14px 18px; border-radius: 999px; min-height: 48px; box-sizing: border-box; margin: 6px 0 4px; ' + (d ? 'background: ' + accent + '; color: #0D0F0E' : 'background: transparent; color: #0D0F0E; border: 1px solid #C9C8C0'),
+        dotStyle: 'flex: none; width: 6px; height: 6px; border-radius: 50%; margin-top: 8px; background: ' + (d ? accent : '#0D0F0E')
+      };
+    });
+    return {
+      accent: accent, tiers: tiers,
+      idrStyle: isIdr ? on : off, usdStyle: isIdr ? off : on,
+      idrPressed: isIdr ? 'true' : 'false', usdPressed: isIdr ? 'false' : 'true',
+      pickIdr: () => this.setState({ cur: 'idr' }),
+      pickUsd: () => this.setState({ cur: 'usd' })
+    };
+  }
+}
+</script>
+</body>
+</html>

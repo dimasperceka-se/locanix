@@ -1,0 +1,22 @@
+{
+  "type": "FeatureCollection",
+  "name": "single_small_under2ha",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Small Plot (<2 ha)" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [101.40000, 0.40000],
+            [101.40110, 0.40000],
+            [101.40110, 0.39910],
+            [101.40000, 0.39910],
+            [101.40000, 0.40000]
+          ]
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "properties": { "name": "1 Kebun Bersih A" },
+      "geometry": { "type": "Polygon", "coordinates": [[[96.906847,4.759811],[96.905778,4.759878],[96.90579,4.760102],[96.906856,4.760043],[96.906847,4.759811]]] } },
+    { "type": "Feature", "properties": { "name": "2 Kebun Bersih B" },
+      "geometry": { "type": "Polygon", "coordinates": [[[96.900937,4.767424],[96.901633,4.767234],[96.901382,4.766749],[96.900729,4.766899],[96.900937,4.767424]]] } },
+    { "type": "Feature", "properties": { "name": "3 Finland (high latitude)" },
+      "geometry": { "type": "Polygon", "coordinates": [[[25.0,62.0],[25.002,62.0],[25.002,62.001],[25.0,62.001],[25.0,62.0]]] } },
+    { "type": "Feature", "properties": { "name": "4 Ketambe Leuser NP" },
+      "geometry": { "type": "Polygon", "coordinates": [[[97.645,3.675],[97.646,3.675],[97.646,3.676],[97.645,3.676],[97.645,3.675]]] } },
+    { "type": "Feature", "properties": { "name": "5 Bowtie (invalid)" },
+      "geometry": { "type": "Polygon", "coordinates": [[[96.9100,4.7600],[96.9110,4.7610],[96.9110,4.7600],[96.9100,4.7610],[96.9100,4.7600]]] } }
+  ]
+}

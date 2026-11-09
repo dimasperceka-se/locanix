@@ -1,0 +1,38 @@
+{
+  "type": "FeatureCollection",
+  "name": "bulk_4plots",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Bulk Plot 1" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[101.50000,0.50000],[101.50090,0.50000],[101.50090,0.49910],[101.50000,0.49910],[101.50000,0.50000]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Bulk Plot 2" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[101.50200,0.50000],[101.50290,0.50000],[101.50290,0.49910],[101.50200,0.49910],[101.50200,0.50000]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Bulk Plot 3" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[101.50000,0.49800],[101.50090,0.49800],[101.50090,0.49710],[101.50000,0.49710],[101.50000,0.49800]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Bulk Plot 4" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[101.50200,0.49800],[101.50290,0.49800],[101.50290,0.49710],[101.50200,0.49710],[101.50200,0.49800]]]
+      }
+    }
+  ]
+}

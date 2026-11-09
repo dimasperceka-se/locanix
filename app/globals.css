@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* ----------------------------------------------------------------------------
+   Locanix design tokens (Tailwind v4 @theme) — "v2 editorial" palette.
+   Reference: docs/design/v2-editorial/Redesign-v2.dc.html
+   Custom colors become utilities automatically, e.g.
+   `bg-ink`, `text-ink-soft`, `border-line`, `bg-accent`.
+---------------------------------------------------------------------------- */
+@theme {
+  /* Ink — near-black used for text, primary buttons and dark sections */
+  --color-ink: #0d0f0e;
+  /* Dark surfaces: hero background and button hover */
+  --color-ink-mid: #23282c;
+  --color-ink-deep: #16191c;
+  /* Body copy on light backgrounds */
+  --color-ink-soft: #4a504c;
+  /* Secondary text, captions, mono labels */
+  --color-muted: #6a706c;
+  /* Paper backgrounds */
+  --color-paper: #fafaf7;
+  --color-paper-warm: #f1f1eb;
+  --color-paper-header: #f4f3ee;
+  /* Hairlines and card borders */
+  --color-line: #e2e1da;
+  --color-line-strong: #c9c8c0;
+  /* Bright green accent (buttons on dark, live badges) and deep green for text */
+  --color-accent: #3ddc84;
+  --color-accent-deep: #1f7a50;
+  --color-accent-mark: #1f9d5c;
+  /* "Needs review" status */
+  --color-review: #c2620f;
+  --color-review-ink: #8a3f06;
+  --color-review-bg: #fbe6d2;
+  /* "Clear" status */
+  --color-clear-ink: #145236;
+  --color-clear-bg: #ddf1e5;
+  /* Kept for the analysis polygon glow on maps */
+  --color-glow-cyan: #22d3ee;
+
+  /* Fonts (wired to next/font CSS variables in app/layout.tsx) */
+  --font-display: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper font-sans text-ink-soft antialiased;
+  }
+
+  /* Display font for all headings */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-tight;
+  }
+}
+
+/* Dark gradient for dashboard headers and panels. */
+@utility bg-ink-gradient {
+  background: radial-gradient(
+    120% 120% at 50% 0%,
+    var(--color-ink-mid) 0%,
+    var(--color-ink) 70%
+  );
+}
+
+/* Soft cyan glow used on map polygons + vertex dots. */
+@utility glow-cyan {
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-glow-cyan) 70%, transparent))
+    drop-shadow(0 0 14px color-mix(in srgb, var(--color-glow-cyan) 45%, transparent));
+}
+
+/* Mono eyebrow label used above section headings. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}

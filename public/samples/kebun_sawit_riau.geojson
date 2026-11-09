@@ -1,0 +1,54 @@
+{
+  "type": "FeatureCollection",
+  "name": "kebun_sawit_riau",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": { "name": "Block 1", "estate": "Riau Sawit" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [101.44000, 0.51000],
+            [101.45080, 0.51050],
+            [101.45050, 0.51760],
+            [101.43980, 0.51720],
+            [101.44000, 0.51000]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Block 2", "estate": "Riau Sawit" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [101.46500, 0.50980],
+            [101.47400, 0.51020],
+            [101.47420, 0.51810],
+            [101.46480, 0.51790],
+            [101.46500, 0.50980]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Block 3", "estate": "Riau Sawit" },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [101.44500, 0.49480],
+            [101.45230, 0.49520],
+            [101.45200, 0.50160],
+            [101.44480, 0.50120],
+            [101.44500, 0.49480]
+          ]
+        ]
+      }
+    }
+  ]
+}

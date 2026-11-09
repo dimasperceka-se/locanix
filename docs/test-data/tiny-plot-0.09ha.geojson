@@ -1,0 +1,7 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    { "type": "Feature", "properties": { "name": "Tiny test plot (0.09 ha)" },
+      "geometry": { "type": "Polygon", "coordinates": [[[106.8, -6.6], [106.80027, -6.6], [106.80027, -6.60027], [106.8, -6.60027], [106.8, -6.6]]] } }
+  ]
+}
