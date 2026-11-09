@@ -83,6 +83,18 @@ test("the plot workspace shows statuses, filters plots and explains the selected
   await expect(page.getByRole("heading", { level: 1, name: "Kebun Kopi Bogor A" })).toBeVisible();
   await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
   await expect(page.locator("canvas").first()).toBeVisible();
+  // Protected-area (WDPA) and deforestation (GLAD) layers, on by default and toggleable.
+  const wdpa = page.getByLabel("Protected areas (WDPA)");
+  const glad = page.getByLabel("Deforestation alerts (GLAD)");
+  await expect(wdpa).toBeChecked();
+  await expect(glad).toBeChecked();
+  await glad.uncheck();
+  await expect(page.getByText("GLAD alerts: UMD via GFW", { exact: false })).toHaveCount(0);
+  await glad.check();
+  await page.getByRole("button", { name: "Layers" }).click();
+  await expect(wdpa).toHaveCount(0);
+  await page.getByRole("button", { name: "Layers" }).click();
+  await expect(wdpa).toBeChecked();
 
   await page.getByRole("link", { name: "Reports & DDS" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Reports & DDS" })).toBeVisible();
