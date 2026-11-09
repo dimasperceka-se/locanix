@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import WorkspaceShell from "@/components/workspace/WorkspaceShell";
 import { getSession } from "@/lib/server/session";
 
 /**
@@ -12,5 +13,5 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
   if (!session) redirect("/login?next=/dashboard");
-  return <>{children}</>;
+  return <WorkspaceShell>{children}</WorkspaceShell>;
 }

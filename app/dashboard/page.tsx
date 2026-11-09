@@ -2,38 +2,29 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-import { ArrowRight, ArrowUpRight, Download, FileCheck2, Lock, Plus, Shapes } from "lucide-react";
+import { Lock, Shapes } from "lucide-react";
 import { analysisByKey } from "@/lib/data";
 import { usePlotStore } from "@/lib/plotStore";
 import type { FeatureCollection, Plot } from "@/lib/geo";
 import { runEudr, validateGeometry } from "@/lib/analysisClient";
 import { persistPlots } from "@/lib/plotsClient";
-import { downloadPlotsExcel } from "@/lib/excel";
 import { authorize } from "@/lib/usageClient";
 import { FREE_QUOTA_HA } from "@/lib/quota";
-import DashboardNavbar from "@/components/DashboardNavbar";
+import { KIND_BADGE, KIND_TONE, plotView, type PlotKind } from "@/lib/plotStatus";
 import AddPlotModal from "@/components/AddPlotModal";
 import AnalyzingOverlay from "@/components/AnalyzingOverlay";
 import { useConsentGate } from "@/components/ConsentGate";
 import DdsModal from "@/components/DdsModal";
 import Popup from "@/components/Popup";
+import PlotMiniMap from "@/components/workspace/PlotMiniMap";
+import { ui } from "@/components/workspace/ui";
 
-const PlotDisplayMap = dynamic(() => import("@/components/PlotDisplayMap"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full min-h-[360px] items-center justify-center rounded-2xl border border-slate-200 text-sm text-slate-400">
-      Loading map…
-    </div>
-  ),
-});
-
-const isInvalid = (p: Plot) => !p.isValid;
+type Filter = "all" | PlotKind;
+const COLS = "grid grid-cols-[28px_minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,0.9fr)_minmax(0,0.8fr)_minmax(0,1fr)_max-content] items-center gap-2.5";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { plots, userName, analyses, addPlots, updatePlots, setEudrDone } =
-    usePlotStore();
+  const { plots, userName, analyses, addPlots, updatePlots, setEudrDone } = usePlotStore();
   const eudrSteps = analyses.map((k) => {
     const a = analysisByKey(k);
     return { label: a.title, icon: a.icon };
@@ -43,7 +34,7 @@ export default function DashboardPage() {
   const [addDone, setAddDone] = useState(false);
   const [eudrRunning, setEudrRunning] = useState(false);
   const [eudrAnimDone, setEudrAnimDone] = useState(false);
-  const [ddsOpen, setDdsOpen] = useState(false);
+  const [ddsPlots, setDdsPlots] = useState<Plot[] | null>(null);
   // Over-quota selection: what's left on the free tier or the user's plan.
   type QuotaBlock = { paid: boolean; remainingHa: number };
   const [quotaBlock, setQuotaBlock] = useState<QuotaBlock | null>(null);
@@ -52,23 +43,34 @@ export default function DashboardPage() {
   // Plots the user unchecked. Tracking exclusions (not selections) keeps every
   // valid plot — including ones added later — checked by default.
   const [excluded, setExcluded] = useState<Set<number>>(() => new Set());
+  const [filter, setFilter] = useState<Filter>("all");
+  const [focusId, setFocusId] = useState<number | null>(null);
   const { ensureConsent, consentModal } = useConsentGate();
   const openAddPlot = async () => {
     if (await ensureConsent()) setModalOpen(true);
   };
 
+  const views = useMemo(() => new Map(plots.map((p) => [p.id, plotView(p)])), [plots]);
+  const view = (p: Plot) => views.get(p.id) ?? plotView(p);
+
   const { selectable, selected, selectedArea } = useMemo(() => {
-    const ok = plots.filter((p) => !isInvalid(p));
+    const ok = plots.filter((p) => p.isValid);
     const sel = ok.filter((p) => !excluded.has(p.id));
-    return {
-      selectable: ok,
-      selected: sel,
-      selectedArea: sel.reduce((s, p) => s + p.areaHa, 0),
-    };
+    return { selectable: ok, selected: sel, selectedArea: sel.reduce((s, p) => s + p.areaHa, 0) };
   }, [plots, excluded]);
   const allSelected = selectable.length > 0 && selected.length === selectable.length;
-  // The DDS covers the checked plots; it needs at least one analyzed plot.
-  const canExportDds = selected.some((p) => p.eudr);
+
+  const counts = useMemo(() => {
+    const c: Record<Filter, number> = { all: plots.length, review: 0, clear: 0, pending: 0, invalid: 0 };
+    for (const p of plots) c[(views.get(p.id) ?? plotView(p)).kind]++;
+    return c;
+  }, [plots, views]);
+  const totalArea = plots.reduce((s, p) => s + p.areaHa, 0);
+
+  const rows = plots.filter((p) => filter === "all" || view(p).kind === filter);
+  // Focus the clicked plot; otherwise the first one needing review, as in the design.
+  const focus =
+    plots.find((p) => p.id === focusId) ?? rows.find((p) => view(p).kind === "review") ?? rows[0] ?? plots[0];
 
   const toggle = (id: number) =>
     setExcluded((prev) => {
@@ -77,17 +79,7 @@ export default function DashboardPage() {
       else next.add(id);
       return next;
     });
-  const toggleAll = () =>
-    setExcluded(allSelected ? new Set(selectable.map((p) => p.id)) : new Set());
-
-  const { totalArea, valid, invalid } = useMemo(() => {
-    const inv = plots.filter(isInvalid).length;
-    return {
-      totalArea: plots.reduce((s, p) => s + p.areaHa, 0),
-      valid: plots.length - inv,
-      invalid: inv,
-    };
-  }, [plots]);
+  const toggleAll = () => setExcluded(allSelected ? new Set(selectable.map((p) => p.id)) : new Set());
 
   const handleAddPlot = async (fc: FeatureCollection, filename: string) => {
     setModalOpen(false);
@@ -135,184 +127,204 @@ export default function DashboardPage() {
     }
   };
 
+  const filters: { key: Filter; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "review", label: "Needs review" },
+    { key: "clear", label: "Clear" },
+    ...(counts.pending ? [{ key: "pending" as const, label: "Not analyzed" }] : []),
+    { key: "invalid", label: "Invalid" },
+  ];
+
+  const stats: { label: string; value: React.ReactNode; tone?: string }[] = [
+    { label: "Plots", value: plots.length },
+    {
+      label: "Total area",
+      value: (
+        <>
+          {totalArea.toFixed(2)} <span className="text-[15px] text-muted">ha</span>
+        </>
+      ),
+    },
+    { label: "Clear", value: counts.clear, tone: "text-clear-ink" },
+    { label: "Needs review", value: counts.review, tone: "text-review-ink" },
+    ...(counts.pending ? [{ label: "Not analyzed", value: counts.pending }] : []),
+    { label: "Invalid geometry", value: counts.invalid },
+  ];
+
+  const fv = focus ? view(focus) : null;
+  const tone = fv ? KIND_TONE[fv.kind] : null;
+
   return (
     <>
-      <DashboardNavbar />
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className={ui.eyebrow}>Workspace · {userName}</span>
+          <h1 className={ui.h1}>Plots</h1>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          <button type="button" onClick={openAddPlot} className={ui.btnOutline}>
+            + Add plots
+          </button>
+          <button type="button" onClick={startEudr} disabled={selected.length === 0} className={ui.btnDark}>
+            Run EUDR analysis
+          </button>
+        </div>
+      </div>
+      {runError && (
+        <p role="alert" className="-mt-2 text-[14px] font-medium text-red-700">
+          {runError}
+        </p>
+      )}
 
-      <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
-        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-          {/* Welcome header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-extrabold text-slate-900">
-              Welcome, {userName}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Here&apos;s your land at a glance
-            </p>
+      {plots.length === 0 ? (
+        <div className={`${ui.card} mx-auto mt-6 flex w-full max-w-md flex-col items-center gap-2 p-10 text-center`}>
+          <p className="m-0 text-[16px] font-semibold">No plots yet</p>
+          <p className="m-0 text-[14px] text-muted">Upload a GeoJSON file or draw a boundary to start.</p>
+          <button type="button" onClick={openAddPlot} className={`${ui.btnDark} mt-3`}>
+            + Add plots
+          </button>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-3">
+            {stats.map((s) => (
+              <div key={s.label} className="flex flex-col gap-1 rounded-[14px] border border-line bg-white px-4.5 py-4">
+                <span className={`text-[13px] ${s.tone ?? "text-muted"}`}>{s.label}</span>
+                <span className="font-display text-[28px] font-semibold">{s.value}</span>
+              </div>
+            ))}
           </div>
 
-          {plots.length === 0 ? (
-            <div className="mx-auto mt-12 max-w-md rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-              <p className="text-base font-bold text-ink">No plots yet</p>
-              <p className="mt-1 text-sm text-slate-500">
-                Add a plot to see your land analysis here.
-              </p>
-              <button
-                type="button"
-                onClick={openAddPlot}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-white hover:bg-ink-mid"
-              >
-                <Plus className="h-4 w-4" aria-hidden="true" />
-                Add plot
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="mt-10 grid gap-6 lg:grid-cols-2">
-                {/* Left: summary card */}
-                <div className="rounded-2xl bg-white p-5 shadow-sm">
-                  <div className="flex items-center gap-3 rounded-xl bg-clear-bg px-4 py-3.5">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full border border-clear-ink/30 text-clear-ink">
-                      <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <span className="font-bold text-clear-ink">Plot Uploaded</span>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-[1fr_auto] gap-4">
-                    <div className="rounded-xl bg-slate-100 p-5">
-                      <p className="text-sm font-medium text-slate-500">
-                        Total Plot Area
-                      </p>
-                      <p className="mt-2 text-4xl font-extrabold text-slate-900">
-                        {totalArea.toFixed(2)}
-                      </p>
-                      <p className="text-sm text-slate-400">Hectare</p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={openAddPlot}
-                      className="flex w-28 flex-col items-center justify-center gap-1 rounded-xl bg-ink text-sm font-semibold text-white hover:bg-ink-mid"
-                    >
-                      <Plus className="h-6 w-6" aria-hidden="true" />
-                      Add plot
+          <div className="flex flex-wrap items-start gap-4">
+            <section aria-label="Plot list" className={`${ui.card} min-w-0 flex-[999_1_520px] overflow-hidden`}>
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line-soft px-4 py-3.5">
+                <div className="flex flex-wrap gap-2">
+                  {filters.map((f) => (
+                    <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => setFilter(f.key)} className={ui.chip(filter === f.key)}>
+                      {f.label} · {counts[f.key]}
                     </button>
-                  </div>
-
-                  <div className="mt-4 grid grid-cols-3 gap-4">
-                    <Stat label="Total Plot" value={plots.length} unit="Plot" />
-                    <Stat label="Valid" value={valid} unit="Plot" tone="green" />
-                    <Stat label="Invalid" value={invalid} unit="Plot" />
-                  </div>
+                  ))}
                 </div>
-
-                {/* Right: map */}
-                <PlotDisplayMap plots={plots} />
-              </div>
-
-              {/* Plots table */}
-              <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-bold text-slate-900">Plots</h2>
-                  <div className="flex flex-wrap justify-end gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        downloadPlotsExcel(plots).catch(() => {});
-                      }}
-                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-ink hover:bg-slate-50"
-                    >
-                      <Download className="h-4 w-4" aria-hidden="true" />
-                      Export Excel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setDdsOpen(true)}
-                      disabled={!canExportDds}
-                      title={canExportDds ? "Due Diligence Statement for the checked plots" : "Run the EUDR analysis on the checked plots first"}
-                      className="inline-flex items-center gap-2 rounded-lg bg-ink px-4 py-2 text-sm font-semibold text-white hover:bg-ink-mid disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      <FileCheck2 className="h-4 w-4" aria-hidden="true" />
-                      Export DDS
-                    </button>
-                  </div>
-                </div>
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full min-w-[640px] text-left text-sm">
-                    <thead>
-                      <tr className="border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-400">
-                        <th className="w-10 py-3 pr-4 font-medium">
-                          <input
-                            type="checkbox"
-                            aria-label="Select all valid plots"
-                            checked={allSelected}
-                            disabled={selectable.length === 0}
-                            onChange={toggleAll}
-                            ref={(el) => {
-                              if (el) el.indeterminate = selected.length > 0 && !allSelected;
-                            }}
-                            className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-ink disabled:cursor-not-allowed"
-                          />
-                        </th>
-                        <th className="py-3 pr-4 font-medium">No</th>
-                        <th className="py-3 pr-4 font-medium">Area</th>
-                        <th className="py-3 pr-4 font-medium">Duplicate Vertices</th>
-                        <th className="py-3 pr-4 font-medium">Zero Area</th>
-                        <th className="py-3 pr-4 font-medium">Self-Intersection</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {plots.map((plot, i) => (
-                        <tr key={plot.id} className="border-b border-slate-50 last:border-0">
-                          <td className="py-4 pr-4">
-                            <input
-                              type="checkbox"
-                              aria-label={`Select plot ${i + 1}`}
-                              title={plot.isValid ? undefined : "Invalid geometry — can't be analyzed"}
-                              checked={plot.isValid && !excluded.has(plot.id)}
-                              disabled={!plot.isValid}
-                              onChange={() => toggle(plot.id)}
-                              className="h-4 w-4 cursor-pointer rounded border-slate-300 accent-ink disabled:cursor-not-allowed disabled:opacity-40"
-                            />
-                          </td>
-                          <td className="py-4 pr-4 text-slate-700">{i + 1}</td>
-                          <td className="py-4 pr-4 font-medium text-slate-700">
-                            {plot.areaHa.toFixed(2)} ha
-                          </td>
-                          <Flag bad={plot.checks.duplicateVertices} />
-                          <Flag bad={plot.checks.zeroArea} />
-                          <Flag bad={plot.checks.selfIntersection} />
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* Run EUDR */}
-              <button
-                type="button"
-                onClick={startEudr}
-                disabled={selected.length === 0}
-                className="mt-6 flex w-full items-center justify-between gap-4 rounded-2xl bg-ink px-8 py-6 text-lg font-bold text-white transition-colors hover:bg-ink-mid disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-ink"
-              >
-                Run EUDR Analysis
-                <span className="flex items-center gap-4">
-                  <span className="text-right text-sm font-medium text-white/70">
-                    {selected.length} of {selectable.length} plot
-                    {selectable.length === 1 ? "" : "s"} · {selectedArea.toFixed(2)} ha
-                  </span>
-                  <ArrowRight className="h-6 w-6 shrink-0" aria-hidden="true" />
+                <span className="text-[13px] text-muted">
+                  {selected.length} of {selectable.length} selected · {selectedArea.toFixed(2)} ha
                 </span>
-              </button>
-              {runError && (
-                <p role="alert" className="mt-3 text-center text-sm font-medium text-red-600">
-                  {runError}
-                </p>
-              )}
-            </>
-          )}
-        </div>
-      </main>
+              </div>
+              <div className="overflow-x-auto">
+                <div className="min-w-[600px]">
+                  <div className={`${COLS} px-4.5 py-3 font-mono text-[11px] tracking-[0.06em] text-muted uppercase`}>
+                    <input
+                      type="checkbox"
+                      aria-label="Select all valid plots"
+                      checked={allSelected}
+                      disabled={selectable.length === 0}
+                      onChange={toggleAll}
+                      ref={(el) => {
+                        if (el) el.indeterminate = selected.length > 0 && !allSelected;
+                      }}
+                      className="h-4 w-4 cursor-pointer accent-ink disabled:cursor-not-allowed"
+                    />
+                    <span>Plot</span>
+                    <span>Area</span>
+                    <span>Geometry</span>
+                    <span>Forest loss</span>
+                    <span>Protected</span>
+                    <span>Status</span>
+                  </div>
+                  {rows.map((p) => {
+                    const v = view(p);
+                    const on = focus?.id === p.id;
+                    const n = plots.indexOf(p) + 1;
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => setFocusId(p.id)}
+                        className={`${COLS} cursor-pointer border-t border-[#F0EFEA] px-4.5 py-3.5 text-[14px] ${
+                          on ? "bg-canvas shadow-[inset_3px_0_0_#0D0F0E]" : "bg-white hover:bg-[#FAFAF7]"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          aria-label={`Select plot ${n}`}
+                          title={p.isValid ? undefined : "Invalid geometry — can't be analyzed"}
+                          checked={p.isValid && !excluded.has(p.id)}
+                          disabled={!p.isValid}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={() => toggle(p.id)}
+                          className="h-4 w-4 cursor-pointer accent-ink disabled:cursor-not-allowed disabled:opacity-40"
+                        />
+                        <button
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => setFocusId(p.id)}
+                          className="flex min-w-0 cursor-pointer flex-col gap-0.5 border-0 bg-transparent p-0 text-left"
+                        >
+                          <span className="truncate font-semibold text-ink">{p.name || `Plot ${n}`}</span>
+                          <span className="text-[12px] text-muted">{v.coords}</span>
+                        </button>
+                        <span className="font-mono text-[13px]">{v.area}</span>
+                        <span className="text-[13px]">{v.geometry}</span>
+                        <span className={v.lossWarn ? "font-semibold text-review-ink" : ""}>{v.loss}</span>
+                        <span className={v.protectedWarn ? "font-semibold text-review-ink" : ""}>{v.protectedArea}</span>
+                        <span>
+                          <span className={`${ui.badge} ${KIND_BADGE[v.kind]}`}>{v.status}</span>
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {rows.length === 0 && <p className="m-0 border-t border-[#F0EFEA] px-4.5 py-8 text-center text-[14px] text-muted">No plots in this filter.</p>}
+                </div>
+              </div>
+            </section>
+
+            {focus && fv && tone && (
+              <section aria-label="Plot detail" className={`${ui.card} flex min-w-0 flex-[1_1_340px] flex-col overflow-hidden`}>
+                <PlotMiniMap plot={focus} stroke={tone[0]} fill={tone[1]} showProtected={fv.protectedWarn} coords={fv.coords} />
+                <div className="flex flex-col gap-4 p-5">
+                  <div className="flex items-start justify-between gap-2.5">
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <h2 className="m-0 truncate font-display text-[22px] font-semibold tracking-[-0.02em]">{focus.name || `Plot ${plots.indexOf(focus) + 1}`}</h2>
+                      <span className="text-[13px] text-muted">
+                        Plot {plots.indexOf(focus) + 1} · {fv.area}
+                      </span>
+                    </div>
+                    <span className={`${ui.badge} ${KIND_BADGE[fv.kind]}`}>{fv.status}</span>
+                  </div>
+                  <p className="m-0 rounded-[10px] px-3.5 py-3 text-[14px] leading-[1.55]" style={{ background: tone[2], color: tone[3] }}>
+                    {fv.verdict}
+                  </p>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      ["Forest loss after 2020", fv.loss],
+                      ["Protected-area overlap", fv.protectedArea],
+                      ["Geometry", fv.geometry],
+                      ["Vertices", String(fv.vertices)],
+                    ].map(([label, value]) => (
+                      <div key={label} className="flex flex-col gap-1 rounded-[10px] border border-line-soft p-3">
+                        <span className="text-[12px] text-muted">{label}</span>
+                        <span className="font-semibold">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      disabled={fv.kind !== "clear" && fv.kind !== "review"}
+                      title={fv.kind === "clear" || fv.kind === "review" ? undefined : "Run the EUDR analysis on this plot first"}
+                      onClick={() => setDdsPlots([focus])}
+                      className={`${ui.btnDark} flex-[1_1_140px]`}
+                    >
+                      Export DDS (PDF)
+                    </button>
+                    <button type="button" onClick={() => router.push(`/dashboard/eudr/${focus.id}`)} className={`${ui.btnOutline} flex-[1_1_120px]`}>
+                      Open on map
+                    </button>
+                  </div>
+                </div>
+              </section>
+            )}
+          </div>
+        </>
+      )}
 
       <AddPlotModal
         open={modalOpen}
@@ -322,12 +334,7 @@ export default function DashboardPage() {
       />
 
       {/* Add-plot geometry check */}
-      <AnalyzingOverlay
-        open={addRunning}
-        done={addDone}
-        steps={[{ label: "Geometry Checker", icon: Shapes }]}
-        onComplete={() => setAddRunning(false)}
-      />
+      <AnalyzingOverlay open={addRunning} done={addDone} steps={[{ label: "Geometry Checker", icon: Shapes }]} onComplete={() => setAddRunning(false)} />
 
       {/* EUDR analysis */}
       <AnalyzingOverlay
@@ -343,8 +350,8 @@ export default function DashboardPage() {
 
       {quotaBlock && (
         <Popup
-          icon={<Lock className="h-6 w-6 text-amber-600" aria-hidden="true" />}
-          tone="bg-amber-100 text-amber-600"
+          icon={<Lock className="h-6 w-6 text-review" aria-hidden="true" />}
+          tone="bg-review-bg text-review"
           title={quotaBlock.paid ? "Not enough quota" : "Free allowance exceeded"}
           body={
             quotaBlock.paid
@@ -357,45 +364,9 @@ export default function DashboardPage() {
         />
       )}
 
-      <DdsModal open={ddsOpen} onClose={() => setDdsOpen(false)} plots={selected} />
+      <DdsModal open={!!ddsPlots} onClose={() => setDdsPlots(null)} plots={ddsPlots ?? []} />
 
       {consentModal}
     </>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  unit,
-  tone,
-}: {
-  label: string;
-  value: number;
-  unit: string;
-  tone?: "green";
-}) {
-  return (
-    <div className="rounded-xl bg-slate-100 p-4">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
-      <p
-        className={`mt-1 text-2xl font-extrabold ${
-          tone === "green" ? "text-accent" : "text-slate-900"
-        }`}
-      >
-        {value}
-      </p>
-      <p className="text-xs text-slate-400">{unit}</p>
-    </div>
-  );
-}
-
-function Flag({ bad }: { bad: boolean }) {
-  return (
-    <td className="py-4 pr-4">
-      <span className={bad ? "font-semibold text-red-500" : "text-slate-500"}>
-        {bad ? "Found" : "None"}
-      </span>
-    </td>
   );
 }

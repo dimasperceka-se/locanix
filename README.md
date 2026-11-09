@@ -46,8 +46,10 @@ See [`.env.example`](.env.example). The important ones:
 | --- | --- |
 | `/` | Landing page (v2 editorial design) |
 | `/analyze` | Upload or draw plots and start the EUDR checks |
-| `/dashboard`, `/dashboard/eudr` | Plot review, results per plot, Excel and DDS export |
-| `/checkout` | Pay as you go, Regular and Professional plans via PayPal |
+| `/dashboard` | Plot workspace: status per plot, filters, plot detail, start the EUDR run |
+| `/dashboard/eudr`, `/dashboard/eudr/[id]` | Reports & DDS: results list, Excel and DDS export, full map per plot |
+| `/dashboard/settings` | Account: profile, password reset link, log out |
+| `/checkout` | Plans and payment. Card and PayPal work today (USD, via PayPal); QRIS, virtual account and e-wallets are shown as coming soon |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Accounts |
 | `/about`, `/contact`, `/privacy` | Company pages |
 
@@ -60,10 +62,16 @@ components/
   Navbar.tsx         site header (hero card on the landing, sticky bar elsewhere)
   Footer.tsx
   Logo.tsx           logo mark + wordmark
+  workspace/         WorkspaceShell (sidebar + plan usage), PlotMiniMap, shared classes
+  CheckoutClient.tsx checkout page
 lib/
   data.ts            nav links, analyses, pricing tiers, company details, policy text
+  plotStatus.ts      Clear / Needs review / Not analyzed / Fix geometry, per plot
   server/            sessions, users, billing, PayPal, mailer, database
-docs/design/v2-editorial/   design reference for the landing page (open Redesign-v2.dc.html)
+docs/design/         design references (open the .dc.html files through a local web server):
+  v2-editorial/        landing page
+  app-plot-workspace/  dashboard
+  app-checkout/        checkout
 e2e/                 Playwright tests
 ```
 

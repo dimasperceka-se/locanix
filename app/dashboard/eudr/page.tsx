@@ -1,128 +1,85 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
 import { usePlotStore } from "@/lib/plotStore";
-import type { Plot } from "@/lib/geo";
+import { downloadPlotsExcel } from "@/lib/excel";
+import { KIND_BADGE, plotView } from "@/lib/plotStatus";
+import DdsModal from "@/components/DdsModal";
+import { ui } from "@/components/workspace/ui";
 
-const NA = { text: "Not analyzed", cls: "italic text-slate-400" };
+const COLS = "grid grid-cols-[1.5fr_0.8fr_1fr_1.1fr_1fr_88px] items-center gap-2.5";
 
-function deforestationLabel(plot: Plot) {
-  if (!plot.isValid || !plot.eudr) return NA;
-  const d = plot.eudr?.deforestation;
-  if (!d) return { text: "—", cls: "text-slate-400" };
-  const high = d.riskLevel.toLowerCase() === "high";
-  return high
-    ? { text: "Loss detected", cls: "text-amber-600 font-medium" }
-    : { text: "No loss detected", cls: "text-emerald-600 font-medium" };
-}
-
-function legalityLabel(plot: Plot) {
-  if (!plot.isValid || !plot.eudr) return NA;
-  const status = plot.eudr?.protectedArea?.status;
-  if (!status) return { text: "—", cls: "text-slate-400" };
-  if (status === "non_compliant") return { text: "Non-Compliant", cls: "text-red-500 font-medium" };
-  if (status === "indicative") return { text: "Review", cls: "text-amber-600 font-medium" };
-  return { text: "Compliant", cls: "text-emerald-600 font-medium" };
-}
-
-function riskBadge(plot: Plot) {
-  if (!plot.isValid || !plot.eudr) {
-    return (
-      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
-        {plot.isValid ? "Not analyzed" : "Invalid geometry"}
-      </span>
-    );
-  }
-  const level = plot.eudr?.deforestation?.riskLevel ?? "—";
-  const high = level.toLowerCase() === "high";
-  return (
-    <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        high ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"
-      }`}
-    >
-      {level}
-    </span>
-  );
-}
-
-export default function EudrResultsPage() {
-  const router = useRouter();
+export default function ReportsPage() {
   const { plots } = usePlotStore();
+  const [ddsOpen, setDdsOpen] = useState(false);
+  const rows = plots.map((p, i) => ({ plot: p, n: i + 1, v: plotView(p) }));
+  const analyzed = rows.filter((r) => r.v.kind === "clear" || r.v.kind === "review").map((r) => r.plot);
 
   return (
-    <main className="min-h-screen">
-      <div className="p-6 lg:p-8">
-        <button
-          type="button"
-          onClick={() => router.push("/dashboard")}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-ink"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          Back to dashboard
-        </button>
-
-        <h1 className="mt-4 text-3xl font-extrabold text-slate-900">
-          EUDR Analysis Results
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Deforestation, legality and risk screening across your plots.
-        </p>
-
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-[11px] uppercase tracking-wider text-slate-400">
-                  <th className="py-3 pr-4 font-medium">No</th>
-                  <th className="py-3 pr-4 font-medium">Area</th>
-                  <th className="py-3 pr-4 font-medium">Deforestation</th>
-                  <th className="py-3 pr-4 font-medium">Land Legality</th>
-                  <th className="py-3 pr-4 font-medium">Risk</th>
-                  <th className="py-3 pr-4 font-medium">
-                    <span className="sr-only">Open</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {plots.map((plot, i) => {
-                  const defo = deforestationLabel(plot);
-                  const legal = legalityLabel(plot);
-                  return (
-                    <tr key={plot.id} className="border-b border-slate-50 last:border-0">
-                      <td className="py-4 pr-4 text-slate-700">{i + 1}</td>
-                      <td className="py-4 pr-4 font-medium text-slate-700">
-                        {plot.areaHa.toFixed(2)} ha
-                      </td>
-                      <td className={`py-4 pr-4 ${defo.cls}`}>{defo.text}</td>
-                      <td className={`py-4 pr-4 ${legal.cls}`}>{legal.text}</td>
-                      <td className="py-4 pr-4">{riskBadge(plot)}</td>
-                      <td className="py-4 pr-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => router.push(`/dashboard/eudr/${plot.id}`)}
-                          aria-label={`Open plot ${i + 1} detail`}
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-ink hover:bg-slate-50"
-                        >
-                          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {plots.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-8 text-center text-sm text-slate-400">
-                      No plots to analyze. Add a plot from the dashboard first.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+    <>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-1.5">
+          <span className={ui.eyebrow}>EUDR analysis results</span>
+          <h1 className={ui.h1}>Reports &amp; DDS</h1>
+        </div>
+        <div className="flex flex-wrap gap-2.5">
+          <button type="button" disabled={!plots.length} onClick={() => downloadPlotsExcel(plots).catch(() => {})} className={ui.btnOutline}>
+            Export Excel
+          </button>
+          <button
+            type="button"
+            disabled={!analyzed.length}
+            title={analyzed.length ? "Due Diligence Statement for every analyzed plot" : "Run the EUDR analysis first"}
+            onClick={() => setDdsOpen(true)}
+            className={ui.btnDark}
+          >
+            Export DDS (PDF)
+          </button>
         </div>
       </div>
-    </main>
+
+      <section aria-label="Analysis results" className={`${ui.card} overflow-hidden`}>
+        <div className="border-b border-line-soft px-4.5 py-3.5 text-[13px] text-muted">
+          {analyzed.length} of {plots.length} plot{plots.length === 1 ? "" : "s"} analyzed. The DDS covers the analyzed plots.
+        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[640px]">
+            <div className={`${COLS} px-4.5 py-3 font-mono text-[11px] tracking-[0.06em] text-muted uppercase`}>
+              <span>Plot</span>
+              <span>Area</span>
+              <span>Forest loss</span>
+              <span>Protected</span>
+              <span>Status</span>
+              <span className="sr-only">Open</span>
+            </div>
+            {rows.map(({ plot, n, v }) => (
+              <div key={plot.id} className={`${COLS} border-t border-[#F0EFEA] px-4.5 py-3.5 text-[14px]`}>
+                <span className="flex min-w-0 flex-col gap-0.5">
+                  <span className="truncate font-semibold">{plot.name || `Plot ${n}`}</span>
+                  <span className="text-[12px] text-muted">{v.coords}</span>
+                </span>
+                <span className="font-mono text-[13px]">{v.area}</span>
+                <span className={v.lossWarn ? "font-semibold text-review-ink" : ""}>{v.loss}</span>
+                <span className={v.protectedWarn ? "font-semibold text-review-ink" : ""}>{v.protectedArea}</span>
+                <span>
+                  <span className={`${ui.badge} ${KIND_BADGE[v.kind]}`}>{v.status}</span>
+                </span>
+                <Link href={`/dashboard/eudr/${plot.id}`} aria-label={`Open plot ${n} detail`} className="justify-self-end text-[13px] font-semibold text-ink no-underline hover:text-accent-deep">
+                  Details →
+                </Link>
+              </div>
+            ))}
+            {!plots.length && (
+              <p className="m-0 border-t border-[#F0EFEA] px-4.5 py-8 text-center text-[14px] text-muted">
+                No plots yet. <Link href="/dashboard" className="font-semibold text-ink">Add plots</Link> to see results here.
+              </p>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <DdsModal open={ddsOpen} onClose={() => setDdsOpen(false)} plots={analyzed} />
+    </>
   );
 }

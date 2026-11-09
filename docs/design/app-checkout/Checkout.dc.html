@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Locanix — checkout</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#0D0F0E}a:hover{color:#1F7A50}
+</style>
+</helmet>
+
+<div style="font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #0D0F0E; background: #F4F4EF; min-height: 1100px; width: 100%">
+
+  <header style="background: #16191C; color: #F7F7F4">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 16px 32px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px">
+      <a href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F7F4">
+        <svg width="22" height="22" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M4 20 L11 5 L24 9 L21 23 Z" stroke="#F7F7F4" stroke-width="2.4" stroke-linejoin="round"></path><circle cx="11" cy="5" r="2.8" fill="{{accent}}"></circle></svg>
+        <span style="font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.02em">Locanix</span>
+      </a>
+      <span style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #C9CCCA">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>Secure checkout</span>
+    </div>
+  </header>
+
+  <div style="max-width: 1200px; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: 24px">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+      <div style="display: flex; flex-direction: column; gap: 6px">
+        <a href="Dashboard.dc.html" style="font-size: 14px; color: #4A504C; text-decoration: none">← Back to plots</a>
+        <h1 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-weight: 600; font-size: 34px; letter-spacing: -0.03em">Checkout</h1>
+      </div>
+      <div role="group" aria-label="Currency" style="display: inline-flex; background: #FFFFFF; border: 1px solid #DAD9D2; border-radius: 999px; padding: 4px; gap: 4px">
+        <button type="button" onClick="{{ pickIdr }}" aria-pressed="{{ idrPressed }}" style="{{ idrStyle }}">IDR</button>
+        <button type="button" onClick="{{ pickUsd }}" aria-pressed="{{ usdPressed }}" style="{{ usdStyle }}">USD</button>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start">
+
+      <!-- LEFT -->
+      <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 20px">
+
+        <section style="background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+          <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 20px; font-weight: 600"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #6A706C; margin-right: 10px">01</span>Choose a plan</h2>
+          <div role="radiogroup" aria-label="Plan" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+            <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+              <button type="button" role="radio" aria-checked="{{ p.checked }}" onClick="{{ p.pick }}" style="{{ p.style }}">
+                <span style="display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%">
+                  <span style="font-weight: 600; font-size: 15px">{{ p.name }}</span>
+                  <span style="{{ p.dot }}"></span>
+                </span>
+                <span style="font-family: 'Inter Tight', sans-serif; font-size: 24px; font-weight: 600; letter-spacing: -0.02em">{{ p.price }}<span style="font-family: Inter, sans-serif; font-size: 13px; font-weight: 500; color: #6A706C"> {{ p.unit }}</span></span>
+                <span style="font-size: 13px; line-height: 1.45; color: #4A504C; text-align: left">{{ p.sub }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </section>
+
+        <section style="background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+          <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 20px; font-weight: 600"><span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #6A706C; margin-right: 10px">02</span>Payment method</h2>
+          <div role="radiogroup" aria-label="Payment method" style="display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{ methods }}" as="m" hint-placeholder-count="5">
+              <button type="button" role="radio" aria-checked="{{ m.checked }}" aria-disabled="{{ m.disabledAttr }}" onClick="{{ m.pick }}" style="{{ m.style }}">
+                <span style="{{ m.dot }}"></span>
+                <span style="display: flex; flex-direction: column; gap: 2px; text-align: left; flex: 1 1 auto; min-width: 0">
+                  <span style="font-weight: 600; font-size: 15px">{{ m.name }}</span>
+                  <span style="font-size: 13px; color: #6A706C">{{ m.desc }}</span>
+                </span>
+                <span style="{{ m.tagStyle }}">{{ m.tag }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <!-- method detail -->
+          <div style="border-top: 1px solid #ECEBE5; padding-top: 18px">
+            <sc-if value="{{ isQris }}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: center">
+                <div style="width: 96px; height: 96px; border: 1.5px dashed #C9C8C0; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #6A706C">QRIS</div>
+                <p style="margin: 0; flex: 1 1 260px; font-size: 14px; line-height: 1.6; color: #3A403C">After you click Pay, a QRIS code appears. Scan it with any Indonesian bank or e-wallet app. The code is valid for 30 minutes and your analysis starts as soon as payment lands.</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isVa }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <span style="font-size: 14px; font-weight: 600">Choose your bank</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                  <sc-for list="{{ banks }}" as="b" hint-placeholder-count="5">
+                    <button type="button" aria-pressed="{{ b.pressed }}" onClick="{{ b.pick }}" style="{{ b.style }}">{{ b.name }}</button>
+                  </sc-for>
+                </div>
+                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3A403C">You’ll get a virtual account number to pay from m-banking, internet banking or an ATM. Confirmation is automatic.</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isEwallet }}" hint-placeholder-val="{{ false }}">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <span style="font-size: 14px; font-weight: 600">Choose your e-wallet</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                  <sc-for list="{{ wallets }}" as="b" hint-placeholder-count="4">
+                    <button type="button" aria-pressed="{{ b.pressed }}" onClick="{{ b.pick }}" style="{{ b.style }}">{{ b.name }}</button>
+                  </sc-for>
+                </div>
+                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3A403C">You’ll be sent to the app to approve the payment, then brought back here.</p>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isCard }}" hint-placeholder-val="{{ false }}">
+              <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+                <label style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Name on card<input type="text" autocomplete="cc-name" style="font: 15px Inter, sans-serif; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 14px; min-height: 46px"></label>
+                <label style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Card number<input type="text" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" style="font: 15px 'JetBrains Mono', monospace; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 14px; min-height: 46px"></label>
+                <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Expiry<input type="text" autocomplete="cc-exp" placeholder="MM / YY" style="font: 15px 'JetBrains Mono', monospace; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 14px; min-height: 46px"></label>
+                <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">CVC<input type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="123" style="font: 15px 'JetBrains Mono', monospace; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 14px; min-height: 46px"></label>
+              </div>
+            </sc-if>
+            <sc-if value="{{ isPaypal }}" hint-placeholder-val="{{ false }}">
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3A403C">You’ll continue to PayPal to log in and approve, then return to Locanix. Charged in USD.</p>
+            </sc-if>
+          </div>
+        </section>
+      </div>
+
+      <!-- RIGHT: summary -->
+      <aside style="flex: 1 1 340px; min-width: 0; background: #FFFFFF; border: 1px solid #E2E1DA; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px">
+        <h2 style="margin: 0; font-family: 'Inter Tight', sans-serif; font-size: 20px; font-weight: 600">Order summary</h2>
+        <div style="display: flex; flex-direction: column; gap: 10px; font-size: 14px">
+          <div style="display: flex; justify-content: space-between; gap: 8px"><span style="color: #4A504C">Plots to analyze</span><span style="font-weight: 600">3</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 8px"><span style="color: #4A504C">Total area</span><span style="font-weight: 600; font-family: 'JetBrains Mono', monospace">24.60 ha</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 8px"><span style="color: #4A504C">Plan</span><span style="font-weight: 600">{{ planName }}</span></div>
+          <div style="display: flex; justify-content: space-between; gap: 8px"><span style="color: #4A504C">{{ lineLabel }}</span><span style="font-weight: 600; font-family: 'JetBrains Mono', monospace">{{ lineValue }}</span></div>
+        </div>
+
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Voucher code
+          <span style="display: flex; gap: 8px">
+            <input type="text" style="flex: 1 1 auto; min-width: 0; font: 15px Inter, sans-serif; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 14px; min-height: 44px">
+            <button type="button" style="font: 600 14px Inter, sans-serif; background: #FFFFFF; color: #0D0F0E; border: 1px solid #C9C8C0; border-radius: 10px; padding: 0 16px; min-height: 44px; cursor: pointer">Apply</button>
+          </span>
+        </label>
+
+        <a href="#survey" style="display: flex; gap: 12px; align-items: flex-start; background: #DDF1E5; color: #0E3B26; border-radius: 12px; padding: 14px; text-decoration: none">
+          <svg style="flex: none; margin-top: 2px" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v8H4v-8M2 7h20v5H2zM12 22V7M12 7S10 2 7 3s0 4 5 4zM12 7s2-5 5-4 0 4-5 4z"></path></svg>
+          <span style="display: flex; flex-direction: column; gap: 2px; font-size: 14px; line-height: 1.45"><span style="font-weight: 600">Pay nothing for this order</span><span>Answer a short survey about your plots →</span></span>
+        </a>
+
+        <div style="border-top: 1px solid #ECEBE5; padding-top: 16px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <span style="font-weight: 600">Total due now</span>
+          <span style="font-family: 'Inter Tight', sans-serif; font-size: 30px; font-weight: 600; letter-spacing: -0.02em">{{ total }}</span>
+        </div>
+        <p style="margin: -8px 0 0; font-size: 13px; line-height: 1.5; color: #6A706C">{{ renewNote }}</p>
+
+        <button type="button" style="font: 600 16px Inter, sans-serif; background: #0D0F0E; color: #FAFAF7; border: 0; border-radius: 999px; min-height: 52px; cursor: pointer">{{ payLabel }}</button>
+        <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #6A706C; text-align: center">By paying you agree to the Terms &amp; Privacy Policy.</p>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#3DDC84","options":["#3DDC84","#C8F169","#7DD3FC"]},"$preview":{"width":1440,"height":1100}}'>
+const PLANS = [
+  { id: 'payg', name: 'Pay As You Go', idr: ['Rp88.200', '/ ha'], usd: ['$4.90', '/ ha'], sub: 'No monthly fee. Pay only for this order.', totalIdr: 'Rp2.169.720', totalUsd: '$120.54', lineIdr: '24.60 ha × Rp88.200', lineUsd: '24.60 ha × $4.90' },
+  { id: 'regular', name: 'Regular', idr: ['Rp522.000', '/ month'], usd: ['$29', '/ month'], sub: '100 ha a month. This order uses 24.6 ha.', totalIdr: 'Rp522.000', totalUsd: '$29.00', lineIdr: 'First month', lineUsd: 'First month' },
+  { id: 'pro', name: 'Professional', idr: ['Rp1.782.000', '/ month'], usd: ['$99', '/ month'], sub: '500 ha a month, raw data export and supply-chain insight.', totalIdr: 'Rp1.782.000', totalUsd: '$99.00', lineIdr: 'First month', lineUsd: 'First month' }
+];
+const METHODS = [
+  { id: 'qris', name: 'QRIS', desc: 'Scan with any bank or e-wallet app', cur: 'idr', recurring: false },
+  { id: 'va', name: 'Bank transfer (virtual account)', desc: 'BCA, Mandiri, BNI, BRI, Permata', cur: 'idr', recurring: false },
+  { id: 'ewallet', name: 'E-wallet', desc: 'GoPay, OVO, DANA, ShopeePay', cur: 'idr', recurring: false },
+  { id: 'card', name: 'Credit or debit card', desc: 'Visa, Mastercard, JCB', cur: 'both', recurring: true },
+  { id: 'paypal', name: 'PayPal', desc: 'Pay with your PayPal balance or linked card', cur: 'usd', recurring: true }
+];
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { cur: 'idr', plan: 'payg', method: 'qris', bank: 'BCA', wallet: 'GoPay' };
+  }
+  setCur(cur) {
+    const m = METHODS.find((x) => x.id === this.state.method);
+    const ok = m.cur === 'both' || m.cur === cur;
+    this.setState({ cur: cur, method: ok ? m.id : (cur === 'idr' ? 'qris' : 'card') });
+  }
+  renderVals() {
+    const accent = this.props.accent ?? '#3DDC84';
+    const st = this.state, isIdr = st.cur === 'idr';
+    const ink = '#0D0F0E';
+    const dotOn = 'flex: none; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; border: 6px solid ' + ink + '; background: #FFFFFF';
+    const dotOff = 'flex: none; width: 18px; height: 18px; border-radius: 50%; box-sizing: border-box; border: 1.5px solid #A9A8A0; background: #FFFFFF';
+    const plans = PLANS.map((p) => {
+      const on = st.plan === p.id, pr = isIdr ? p.idr : p.usd;
+      return { name: p.name, price: pr[0], unit: pr[1], sub: p.sub, checked: on ? 'true' : 'false', dot: on ? dotOn : dotOff,
+        pick: () => this.setState({ plan: p.id }),
+        style: 'display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 16px; border-radius: 12px; cursor: pointer; font-family: Inter, sans-serif; color: ' + ink + '; text-align: left; ' + (on ? 'background: #F4F4EF; border: 2px solid ' + ink : 'background: #FFFFFF; border: 2px solid #E2E1DA') };
+    });
+    const plan = PLANS.find((p) => p.id === st.plan);
+    const methods = METHODS.map((m) => {
+      const avail = m.cur === 'both' || m.cur === st.cur;
+      const on = st.method === m.id;
+      const tag = !avail ? (m.cur === 'idr' ? 'IDR only' : 'USD only') : (plan.id !== 'payg' && !m.recurring ? 'Monthly invoice' : (plan.id !== 'payg' ? 'Auto-renew' : ''));
+      return { name: m.name, desc: m.desc, tag: tag, checked: on ? 'true' : 'false', disabledAttr: avail ? 'false' : 'true', dot: on ? dotOn : dotOff,
+        pick: () => { if (avail) this.setState({ method: m.id }); },
+        tagStyle: tag ? 'flex: none; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; ' + (!avail ? 'background: #ECEBE5; color: #4A504C' : 'background: #F4F4EF; color: #3A403C; border: 1px solid #DAD9D2') : 'display: none',
+        style: 'display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; border-radius: 12px; font-family: Inter, sans-serif; color: ' + ink + '; text-align: left; cursor: ' + (avail ? 'pointer' : 'not-allowed') + '; opacity: ' + (avail ? '1' : '0.55') + '; ' + (on ? 'background: #F4F4EF; border: 2px solid ' + ink : 'background: #FFFFFF; border: 2px solid #E2E1DA') };
+    });
+    const chip = (on) => 'font: ' + (on ? '600' : '500') + ' 14px Inter, sans-serif; border-radius: 10px; padding: 0 16px; min-height: 44px; cursor: pointer; ' + (on ? 'background: #0D0F0E; color: #FAFAF7; border: 1px solid #0D0F0E' : 'background: #FFFFFF; color: #0D0F0E; border: 1px solid #C9C8C0');
+    const banks = ['BCA', 'Mandiri', 'BNI', 'BRI', 'Permata'].map((b) => ({ name: b, pressed: st.bank === b ? 'true' : 'false', style: chip(st.bank === b), pick: () => this.setState({ bank: b }) }));
+    const wallets = ['GoPay', 'OVO', 'DANA', 'ShopeePay'].map((b) => ({ name: b, pressed: st.wallet === b ? 'true' : 'false', style: chip(st.wallet === b), pick: () => this.setState({ wallet: b }) }));
+    const meth = METHODS.find((m) => m.id === st.method);
+    const total = isIdr ? plan.totalIdr : plan.totalUsd;
+    let renew = 'One-time payment for this order.';
+    if (plan.id !== 'payg') renew = meth.recurring ? 'Renews automatically each month. Cancel anytime.' : 'Billed monthly: we’ll send a new ' + meth.name.split(' (')[0] + ' payment link before each renewal.';
+    const payLabel = st.method === 'paypal' ? 'Continue to PayPal' : (st.method === 'card' ? 'Pay ' + total : 'Pay ' + total + ' with ' + (st.method === 'va' ? st.bank + ' VA' : st.method === 'ewallet' ? st.wallet : 'QRIS'));
+    const on = 'font: 600 14px Inter, sans-serif; border: 0; border-radius: 999px; padding: 0 18px; min-height: 40px; cursor: pointer; background: #0D0F0E; color: #FAFAF7';
+    const off = 'font: 500 14px Inter, sans-serif; border: 0; border-radius: 999px; padding: 0 18px; min-height: 40px; cursor: pointer; background: transparent; color: #4A504C';
+    return {
+      accent: accent, plans: plans, methods: methods, banks: banks, wallets: wallets,
+      isQris: st.method === 'qris', isVa: st.method === 'va', isEwallet: st.method === 'ewallet', isCard: st.method === 'card', isPaypal: st.method === 'paypal',
+      planName: plan.name, lineLabel: isIdr ? plan.lineIdr : plan.lineUsd, lineValue: total, total: total, renewNote: renew, payLabel: payLabel,
+      idrStyle: isIdr ? on : off, usdStyle: isIdr ? off : on, idrPressed: isIdr ? 'true' : 'false', usdPressed: isIdr ? 'false' : 'true',
+      pickIdr: () => this.setCur('idr'), pickUsd: () => this.setCur('usd')
+    };
+  }
+}
+</script>
+</body>
+</html>

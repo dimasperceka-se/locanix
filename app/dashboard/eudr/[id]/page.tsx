@@ -11,7 +11,7 @@ import { formatAmount } from "@/lib/format";
 const PlotDisplayMap = dynamic(() => import("@/components/PlotDisplayMap"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full min-h-[360px] items-center justify-center rounded-2xl border border-slate-200 bg-white text-sm text-slate-400">
+    <div className="flex h-full min-h-[360px] items-center justify-center rounded-2xl border border-line bg-white text-sm text-muted">
       Loading map…
     </div>
   ),
@@ -165,17 +165,12 @@ export default function EudrPlotDetailPage({
 
   if (!plot) {
     return (
-      <div className="p-6 lg:p-8">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-ink"
-        >
+      <div>
+        <Link href="/dashboard" className="inline-flex items-center gap-2 text-[14px] text-ink-soft no-underline hover:text-ink">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          back to dashboard
+          Back to plots
         </Link>
-        <p className="mt-8 text-sm text-slate-500">
-          Plot not found. It may have been cleared — return to the dashboard.
-        </p>
+        <p className="mt-8 text-[14px] text-muted">Plot not found. It may have been cleared — return to your plots.</p>
       </div>
     );
   }
@@ -219,38 +214,37 @@ export default function EudrPlotDetailPage({
   ];
 
   return (
-    <div className="p-6 lg:p-8">
-      <h1 className="text-2xl font-extrabold text-slate-900">EUDR Analysis</h1>
-      <Link
-        href="/dashboard"
-        className="mt-1 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-ink"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        back to dashboard
-      </Link>
+    <div>
+      <div className="flex flex-col gap-1.5">
+        <Link href="/dashboard/eudr" className="inline-flex items-center gap-2 text-[14px] text-ink-soft no-underline hover:text-ink">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Back to reports
+        </Link>
+        <h1 className="m-0 font-display text-[34px] font-semibold tracking-[-0.03em] text-ink">{plot.name || "Plot detail"}</h1>
+      </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="h-[320px] lg:col-span-2">
           <PlotDisplayMap plots={[plot]} />
         </div>
-        <div className="rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-ink">Plot Information</h2>
+        <div className="rounded-2xl border border-line bg-white p-6">
+          <h2 className="font-display text-[20px] font-semibold text-ink">Plot Information</h2>
           <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4">
             {info.map((row) => (
               <div key={row.label} className="min-w-0">
                 <dt className="text-sm font-semibold text-ink">{row.label}</dt>
-                <dd className="truncate text-sm text-slate-500">{row.value}</dd>
+                <dd className="truncate text-sm text-muted">{row.value}</dd>
               </div>
             ))}
           </dl>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-2xl border border-line bg-white p-6">
         <div
           role="tablist"
           aria-label="Analysis results"
-          className="flex flex-wrap gap-6 border-b border-slate-100"
+          className="flex flex-wrap gap-6 border-b border-line-soft"
         >
           {TABS.map((t) => (
             <button
@@ -262,15 +256,15 @@ export default function EudrPlotDetailPage({
               onClick={() => setTab(t.key)}
               className={`-mb-px border-b-2 pb-3 text-sm font-semibold transition-colors ${
                 t.soon
-                  ? "cursor-not-allowed border-transparent text-slate-300"
+                  ? "cursor-not-allowed border-transparent text-line-strong"
                   : tab === t.key
                     ? "border-ink text-ink"
-                    : "border-transparent text-slate-400 hover:text-slate-600"
+                    : "border-transparent text-muted hover:text-ink-soft"
               }`}
             >
               {t.label}
               {t.soon && (
-                <span className="ml-2 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <span className="ml-2 rounded-full bg-[#ECEBE5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
                   Soon
                 </span>
               )}
@@ -291,15 +285,15 @@ export default function EudrPlotDetailPage({
         {content.tiles.length > 0 ? (
           <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {content.tiles.map((tile) => (
-              <div key={tile.label} className="rounded-xl bg-slate-100 p-5">
-                <p className="text-sm font-medium text-slate-500">{tile.label}</p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-900">{tile.value}</p>
-                {tile.sub && <p className="text-sm text-slate-400">{tile.sub}</p>}
+              <div key={tile.label} className="rounded-xl border border-line-soft bg-canvas p-5">
+                <p className="text-sm font-medium text-muted">{tile.label}</p>
+                <p className="mt-2 font-display text-[28px] font-semibold text-ink">{tile.value}</p>
+                {tile.sub && <p className="text-sm text-muted">{tile.sub}</p>}
               </div>
             ))}
           </div>
         ) : (
-          <p className="mt-5 text-sm text-slate-400">
+          <p className="mt-5 text-sm text-muted">
             No data for this analysis — re-run the EUDR analysis from the dashboard.
           </p>
         )}

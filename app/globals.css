@@ -20,9 +20,12 @@
   --color-paper: #fafaf7;
   --color-paper-warm: #f1f1eb;
   --color-paper-header: #f4f3ee;
+  /* App canvas behind workspace and checkout cards */
+  --color-canvas: #f4f4ef;
   /* Hairlines and card borders */
   --color-line: #e2e1da;
   --color-line-strong: #c9c8c0;
+  --color-line-soft: #ecebe5;
   /* Bright green accent (buttons on dark, live badges) and deep green for text */
   --color-accent: #3ddc84;
   --color-accent-deep: #1f7a50;
