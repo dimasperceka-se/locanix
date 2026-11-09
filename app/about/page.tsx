@@ -6,7 +6,7 @@ import { getSession } from "@/lib/server/session";
 
 export const metadata: Metadata = {
   title: "About Us — Locanix",
-  description: "PT Niaga Bumi Lestari — digital sustainability & compliance.",
+  description: "Locanix — digital sustainability & compliance.",
 };
 
 const VALUES = [
@@ -57,7 +57,7 @@ export default async function AboutPage() {
               <div className="space-y-4">
                 <h2 className="text-4xl font-extrabold text-ink">Our Mission</h2>
                 <p className="text-lg leading-relaxed text-slate-600">
-                  Niaga Bumi Lestari transforms environmental sustainability
+                  Locanix transforms environmental sustainability
                   through cutting-edge digital technology solutions, empowering
                   enterprises to achieve verified ESG compliance and supply chain
                   transparency.
@@ -102,7 +102,7 @@ export default async function AboutPage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=600&h=400"
-                alt="PT Niaga Bumi Lestari team collaborating on digital sustainability and compliance"
+                alt="Team collaborating on digital sustainability and compliance"
                 className="w-full rounded-2xl shadow-xl"
               />
               <div className="absolute -left-6 -top-6 rounded-xl border border-slate-100 bg-white p-4 shadow-lg">
