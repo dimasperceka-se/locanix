@@ -1,4 +1,6 @@
+import type { DdsDetails } from "@/lib/dds";
 import { ddrCsv, euisGeoJson, plantationSizeType, type DdrRow, type EuisPlot } from "@/lib/euisExport";
+import type { Plot } from "@/lib/geo";
 import { PREVIEW_PLOTS, type PreviewPlot } from "./preview-data";
 
 /** The preview's sample plots as EUIS GeoJSON and as a DDR. */
@@ -47,4 +49,51 @@ export function previewDdr(): string {
   // Same plot order as the GeoJSON, so a3_plot_id lines up with ProductionPlace.
   const plots = [...PREVIEW_PLOTS].sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }));
   return ddrCsv(plots.map(ddrRow));
+}
+
+/**
+ * The preview plots as a Due Diligence Statement, built by the same generator as the
+ * dashboard's DDS export. Screening comes from the real API results; the operator and
+ * product fields are sample placeholders, since the landing page has no operator.
+ */
+export async function downloadPreviewDds() {
+  const [{ buildDds }, { downloadDdsPdf }] = await Promise.all([import("@/lib/dds"), import("@/lib/ddsPdf")]);
+  const plots: Plot[] = [...PREVIEW_PLOTS]
+    .sort((a, b) => a.id.localeCompare(b.id, "en", { numeric: true }))
+    .map((p, i) => ({
+      id: i + 1,
+      plotId: p.id,
+      name: `Plot ${p.id}`,
+      ring: p.ring,
+      areaHa: p.areaHa,
+      checks: { duplicateVertices: false, zeroArea: false, selfIntersection: false },
+      isValid: true,
+      issues: [],
+      eudr: {
+        deforestation: { riskLevel: p.risk === "high" ? "High" : "Low", ...p.datasets },
+        protectedArea: { status: p.wdpaStatus, categories: p.wdpaCategories },
+      },
+    }));
+  const details: DdsDetails = {
+    legalName: "Sample operator (Locanix demo)",
+    vat: "SAMPLE-VAT",
+    eori: "SAMPLE-EORI",
+    operatorCountry: "ID",
+    operatorType: "operator",
+    size: "medium",
+    product: "Crude palm oil",
+    hsCode: "1511.10",
+    quantityKg: "25000",
+    productionCountry: "Indonesia",
+    countryRisk: "standard",
+    suppliers: `${PRODUCER.name} (${PRODUCER.district}, ${PRODUCER.province})`,
+    riskNotes: "",
+    euReference: "",
+    representative: "",
+  };
+  const date = new Date();
+  const model = buildDds(plots, details, date);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  model.reference = `DDS-SAMPLE-${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+  await downloadDdsPdf(model);
 }

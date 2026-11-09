@@ -17,6 +17,8 @@ export type PreviewPlot = {
   lossYear: number | null;
   wdpaStatus: "compliant" | "indicative" | "non_compliant";
   wdpaCategories: string[];
+  /** Loss after 2020 per dataset, as returned by the API (ha, % of plot). */
+  datasets: Record<"gfw" | "jrc" | "sbtn", { ha: number; pct: number }>;
 };
 
 export const PREVIEW_REGION = "Pelalawan, Riau";
@@ -24,10 +26,10 @@ export const PREVIEW_PARK = { name: "Tesso Nilo National Park", iucn: "II" };
 
 // prettier-ignore
 export const PREVIEW_PLOTS: PreviewPlot[] = [
-  { id: "B", ring: [[101.856331,-0.120787],[101.861098,-0.120518],[101.860631,-0.115976],[101.856026,-0.116462]], areaHa: 25.75, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "non_compliant", wdpaCategories: ["II"] },
-  { id: "C", ring: [[101.877205,-0.134957],[101.881799,-0.136254],[101.882837,-0.131807],[101.878324,-0.130767]], areaHa: 25.76, risk: "high", lossHa: 0.09, lossYear: 2024, wdpaStatus: "compliant", wdpaCategories: [] },
-  { id: "A", ring: [[101.869831,-0.122787],[101.874598,-0.122518],[101.874131,-0.117976],[101.869526,-0.118462]], areaHa: 25.75, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "compliant", wdpaCategories: [] },
-  { id: "D", ring: [[101.891483,-0.130221],[101.895421,-0.129456],[101.894456,-0.125579],[101.890679,-0.126514]], areaHa: 18.93, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "compliant", wdpaCategories: [] },
+  { id: "B", ring: [[101.856331,-0.120787],[101.861098,-0.120518],[101.860631,-0.115976],[101.856026,-0.116462]], areaHa: 25.75, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "non_compliant", wdpaCategories: ["II"], datasets: { gfw: { ha: 0.0, pct: 0.0 }, jrc: { ha: 0.0, pct: 0.0 }, sbtn: { ha: 0.0, pct: 0.0 } } },
+  { id: "C", ring: [[101.877205,-0.134957],[101.881799,-0.136254],[101.882837,-0.131807],[101.878324,-0.130767]], areaHa: 25.76, risk: "high", lossHa: 0.09, lossYear: 2024, wdpaStatus: "compliant", wdpaCategories: [], datasets: { gfw: { ha: 0.0, pct: 0.0 }, jrc: { ha: 0.0894, pct: 0.3471 }, sbtn: { ha: 0.0, pct: 0.0 } } },
+  { id: "A", ring: [[101.869831,-0.122787],[101.874598,-0.122518],[101.874131,-0.117976],[101.869526,-0.118462]], areaHa: 25.75, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "compliant", wdpaCategories: [], datasets: { gfw: { ha: 0.0, pct: 0.0 }, jrc: { ha: 0.0, pct: 0.0 }, sbtn: { ha: 0.0, pct: 0.0 } } },
+  { id: "D", ring: [[101.891483,-0.130221],[101.895421,-0.129456],[101.894456,-0.125579],[101.890679,-0.126514]], areaHa: 18.93, risk: "low", lossHa: 0.0, lossYear: null, wdpaStatus: "compliant", wdpaCategories: [], datasets: { gfw: { ha: 0.0, pct: 0.0 }, jrc: { ha: 0.0, pct: 0.0 }, sbtn: { ha: 0.0, pct: 0.0 } } },
 ];
 
 // prettier-ignore

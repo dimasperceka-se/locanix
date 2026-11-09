@@ -141,4 +141,19 @@ test.describe("landing preview export", () => {
     expect(byId.C.c2_deforestation_spatial_analysis_result).toBe("b. Indication of deforestation");
     expect(byId.A.c5_deforestation_final_status).toBe("a. Deforestation-free");
   });
+
+  test("DDS is the Due Diligence Statement PDF, reflecting the screening", async ({ page }) => {
+    await page.goto("/");
+    const preview = page.getByRole("region", { name: "Product preview" });
+    await preview.getByRole("button", { name: "Export" }).click();
+    const [file] = await Promise.all([
+      page.waitForEvent("download", { timeout: 60_000 }),
+      preview.getByRole("menuitem", { name: /^DDS/ }).click(),
+    ]);
+    expect(file.suggestedFilename()).toMatch(/^DDS-SAMPLE-\d{8}\.pdf$/);
+    const { readFile } = await import("node:fs/promises");
+    const bytes = await readFile((await file.path())!);
+    expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
+    expect(bytes.toString("latin1")).toContain("Due Diligence Statement DDS-SAMPLE-");
+  });
 });
