@@ -220,7 +220,8 @@ export default function PreviewMap() {
         {toggle("glad", "Deforestation alerts (GLAD)", "bg-[#E6639B]")}
       </fieldset>
 
-      <p className="pointer-events-auto absolute right-0 bottom-0 z-10 m-0 max-w-[75%] rounded-tl-md bg-white/70 px-1.5 py-0.5 text-right text-[9.5px] leading-[1.35] text-[#3A403C]">
+      {/* Kept right of the status legend (bottom-left) so it never hides behind it. */}
+      <p className="pointer-events-auto absolute right-0 bottom-0 z-10 m-0 max-w-[75%] rounded-tl-md bg-white/70 px-1.5 py-0.5 text-right text-[9.5px] leading-[1.35] text-[#3A403C] sm:max-w-[calc(100%-250px)]">
         <span className="hidden sm:inline">
           © Esri, Maxar, Earthstar Geographics
           {layers.glad && " · GLAD alerts: UMD / Global Forest Watch (CC BY 4.0)"}

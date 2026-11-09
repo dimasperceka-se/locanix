@@ -1,3 +1,4 @@
+import ExportMenu from "./ExportMenu";
 import LazyPreviewMap from "./LazyPreviewMap";
 import { PREVIEW_PARK, PREVIEW_PLOTS, PREVIEW_REGION, lossLabel, needsReview, protectedLabel, reviewNote } from "./preview-data";
 
@@ -41,7 +42,7 @@ export default function ProductPreview() {
                 {PREVIEW_PLOTS.length} plots · {totalHa.toFixed(2)} ha · {reviewCount} need review
               </span>
             </div>
-            <span className="rounded-full border border-line-strong px-3.5 py-2 text-[13px] font-semibold">Export PDF</span>
+            <ExportMenu />
           </div>
           <div className="overflow-x-auto">
             <div className="min-w-[320px]">
