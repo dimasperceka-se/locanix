@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures";
+import { signedInAccount } from "./helpers";
 
 test("home page loads", async ({ page }) => {
   await page.goto("/");
@@ -156,4 +157,15 @@ test.describe("landing preview export", () => {
     expect(bytes.subarray(0, 5).toString()).toBe("%PDF-");
     expect(bytes.toString("latin1")).toContain("Due Diligence Statement DDS-SAMPLE-");
   });
+});
+
+test("signed-in visitors are sent to their workspace by \"Try Locanix\" and the sign-up page", async ({ page }) => {
+  await signedInAccount(page, "trylocanix");
+  await page.goto("/");
+  const start = page.locator("#start");
+  await expect(start.getByRole("link", { name: "Try Locanix →" })).toHaveAttribute("href", "/dashboard");
+  await start.getByRole("link", { name: "Try Locanix →" }).click();
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/register");
+  await expect(page).toHaveURL(/\/dashboard$/);
 });

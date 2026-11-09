@@ -1,6 +1,7 @@
 import { FREE_QUOTA_HA } from "@/lib/quota";
 
-export default function FinalCta() {
+/** Signed-in visitors go straight to their workspace instead of the sign-up form. */
+export default function FinalCta({ authed = false }: { authed?: boolean }) {
   return (
     <section id="start" className="bg-ink text-[#F2F2EE]">
       <div className="mx-auto flex max-w-[1360px] flex-col items-center gap-7 px-5 py-24 text-center sm:px-10 md:py-34">
@@ -9,7 +10,7 @@ export default function FinalCta() {
           Your first {FREE_QUOTA_HA} hectares are on us.
         </h2>
         <div className="flex flex-wrap justify-center gap-3">
-          <a href="/register" className="rounded-full bg-accent px-6.5 py-4 text-[16px] font-semibold text-ink no-underline hover:bg-[#5BE59A]">
+          <a href={authed ? "/dashboard" : "/register"} className="rounded-full bg-accent px-6.5 py-4 text-[16px] font-semibold text-ink no-underline hover:bg-[#5BE59A]">
             Try Locanix →
           </a>
           <a

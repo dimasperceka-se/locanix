@@ -16,7 +16,7 @@ export default async function Home() {
         <Customers />
         <HowItWorks />
         <Pricing />
-        <FinalCta />
+        <FinalCta authed={!!session} />
       </main>
       <Footer />
     </div>
