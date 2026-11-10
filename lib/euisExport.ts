@@ -3,10 +3,10 @@
  *
  * - GeoJSON geolocation, the EUIS standard: FeatureCollection, WGS 84 lon/lat,
  *   coordinates cut to 6 decimals, closed polygons, and exactly four properties in a
- *   fixed order. Reference: TRACES "EUDR GeoJSON description".
- * - DDR (Due Diligence Report), the SystemEarth CSV kept as evidence behind a DDS; it is
- *   not sent to EUIS. 35 columns in the order of eudr-api `_transform_to_ddr_format`,
- *   every cell quoted, as written by `_generate_csv` (Python csv, QUOTE_ALL, CRLF).
+ *   fixed order. Reference: EUIS "GeoJSON File Description" (EUDR Information System –
+ *   Operator API Reference).
+ * - DDR (Due Diligence Report): a 35-column CSV kept as evidence behind a DDS; it is not
+ *   sent to EUIS. Every cell quoted, CRLF line endings.
  */
 
 export type EuisPlot = {

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { usePlotStore } from "@/lib/plotStore";
 import { ui } from "@/components/workspace/ui";
+import EuisSettings from "@/components/workspace/EuisSettings";
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -84,6 +85,8 @@ export default function SettingsPage() {
             )}
           </div>
         </section>
+
+        <EuisSettings />
 
         <section className={section}>
           <h2 className={h2}>Billing</h2>

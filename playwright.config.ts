@@ -36,6 +36,14 @@ export default defineConfig({
       SMTP_HOST: "127.0.0.1",
       SMTP_PORT: "9",
       NEXT_TELEMETRY_DISABLED: "1",
+      // DDS Submission talks to the built-in mock EUIS, never to the real one,
+      // and may ask for the status right away instead of after an hour.
+      EUIS_MOCK: "1",
+      EUIS_BASE_URL: `${baseURL}/api/euis-mock`,
+      EUIS_MOCK_ANALYSIS_MS: "1500",
+      EUIS_STATUS_FIRST_CHECK_SEC: "0",
+      EUIS_STATUS_INTERVAL_SEC: "0",
+      EUIS_RESOLVE_INTERVAL_SEC: "0",
     },
   },
 });

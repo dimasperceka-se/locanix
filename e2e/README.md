@@ -17,7 +17,9 @@ can run next to your normal dev server. That server uses:
 - a closed SMTP port, so no email is ever sent. Tests open verification and
   reset links by reading `.data-e2e/users.json`;
 - PayPal **Sandbox** with the credentials in `.env`. Checkouts are created but
-  never approved, and pending subscriptions are cancelled again.
+  never approved, and pending subscriptions are cancelled again;
+- the built-in **mock EUIS** (`/api/euis-mock`) for DDS Submission, never the real
+  EUIS. `dds.spec.ts` saves the mock key `locanix-mock-key` as the authentication key.
 
 `paypal-approval.spec.ts` logs in on PayPal's Sandbox pages and pays. It is
 skipped unless you pass a Sandbox **personal** account:

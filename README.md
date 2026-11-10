@@ -39,6 +39,8 @@ See [`.env.example`](.env.example). The important ones:
 | `PAYPAL_*` | PayPal app, plans and webhook; set up with [`scripts/setup-paypal.mjs`](scripts/setup-paypal.mjs) and [`scripts/PAYPAL-WEBHOOK.md`](scripts/PAYPAL-WEBHOOK.md) |
 | `SMTP_*` | Verification, password-reset and contact emails |
 | `LOCANIX_DATA_DIR` | Optional: folder for the file stores (default `.data`) |
+| `EUIS_CREDENTIAL_ENC_KEY` | Encrypts the EUIS authentication keys saved for DDS Submission (32 bytes, base64 or hex); required in production |
+| `EUIS_MOCK`, `EUIS_BASE_URL` | Local only: send DDS to the built-in mock EUIS (`/api/euis-mock`) instead of EUIS Acceptance |
 
 ## Pages
 
@@ -48,10 +50,36 @@ See [`.env.example`](.env.example). The important ones:
 | `/analyze` | Upload or draw plots and start the EUDR checks |
 | `/dashboard` | Plot workspace: status per plot, filters, plot detail, start the EUDR run |
 | `/dashboard/eudr`, `/dashboard/eudr/[id]` | Reports & DDS: results list, Excel and DDS export, full map per plot |
-| `/dashboard/settings` | Account: profile, password reset link, log out |
+| `/dashboard/dds`, `/dashboard/dds/[id]` | DDS Submission: Due Diligence Statements from Clear plots, filed with EUIS (TRACES) Acceptance |
+| `/dashboard/settings` | Account: profile, EUIS connection, password reset link, log out |
 | `/checkout` | Plans and payment. Card and PayPal work today (USD, via PayPal); QRIS, virtual account and e-wallets are shown as coming soon |
 | `/login`, `/register`, `/forgot-password`, `/reset-password` | Accounts |
 | `/about`, `/contact`, `/privacy` | Company pages |
+
+## DDS Submission (EUIS)
+
+Users file a Due Diligence Statement for their Clear plots with the EU Information
+System (EUIS, on TRACES), **Acceptance environment only**: there is no production
+endpoint in the code. The SOAP client in [`lib/server/euis/`](lib/server/euis/) is
+built from public EU sources only: the V4 service WSDL/XSDs the system publishes
+(`…/tracesnt/ws/EUDRDueDiligenceStatementServiceV4?wsdl`, `EudrEchoService?wsdl`) and the
+*EUDR Information System – Operator API Reference*
+(`https://acceptance.eudr.webcloud.ec.europa.eu/tracesnt/help/eudr-documentation/operator/`).
+Authentication is WS-Security UsernameToken with PasswordDigest (OASIS UsernameToken
+Profile 1.0) plus a timestamp and the `WebServiceClientId` header.
+
+- Each user saves their own EUIS web-service user in Settings; the authentication key is
+  stored AES-256-GCM encrypted (`EUIS_CREDENTIAL_ENC_KEY`) and never sent back to the browser.
+- A statement is marked as sending before the request leaves and is sent once; it is never
+  retried automatically. Without a clear answer it becomes "Check needed" and is resolved by
+  looking its internal reference up in EUIS, so nothing is filed twice.
+- Status checks follow the EU guidance: the first one an hour after submitting, then at most
+  every 15 minutes, while the statement page is open or on "Refresh status".
+- Free users can file DDS for up to 10 ha of distinct plots; paid plans have no DDS limit.
+- Statements are stored in `.data/dds/` and mirrored to PostgreSQL (`dds_accounts`, `dds_statements`).
+- `EUIS_MOCK=1` with `EUIS_BASE_URL=http://localhost:3000/api/euis-mock` (never in production)
+  runs everything against a built-in mock that checks the same WS-Security digest; the
+  e2e tests use it with the key `locanix-mock-key`.
 
 ## Structure
 

@@ -57,8 +57,7 @@ for (const path of ["/dashboard", "/checkout"]) {
 }
 
 test.describe("landing preview export", () => {
-  // Rules: TRACES "EUDR GeoJSON description" and the SystemEarth DDR (eudr-api
-  // _transform_to_ddr_format, csv-validation-function config).
+  // Rules: the EUIS "GeoJSON File Description" and the 35-column DDR layout.
   const DDR_HEADER = [
     "a1_factory_id", "a2_lot_number", "a3_plot_id", "a4_processing_date", "a5_production_harvest_date",
     "a6_tier1_supplier_id", "a7_size_of_plot_ha", "a8_plantation_size_type", "b1_supply_chain_type",
@@ -116,7 +115,7 @@ test.describe("landing preview export", () => {
     expect(fc.features.map((f: { properties: { ProductionPlace: string } }) => f.properties.ProductionPlace)).toEqual(["A", "B", "C", "D"]);
   });
 
-  test("DDR is the 35-column SystemEarth CSV and matches the GeoJSON plot IDs", async ({ page }) => {
+  test("DDR is the 35-column CSV and matches the GeoJSON plot IDs", async ({ page }) => {
     await page.goto("/");
     const { name, text } = await download(page, "DDR");
     expect(name).toMatch(/\.csv$/);

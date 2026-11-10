@@ -260,3 +260,126 @@ export async function readWorkspaceFromDb(
   });
   return { plots, eudrDone: head.rows[0].eudr_done, updatedAt: Math.round(head.rows[0].updated_ms) };
 }
+
+/* -------------------------------------------------------------------------- */
+/*  DDS Submission: each user's EUIS identity and statements                  */
+/* -------------------------------------------------------------------------- */
+
+let ddsSchemaReady: Promise<void> | null = null;
+
+/**
+ * `dds_accounts`: one row per user, with the EUIS Acceptance identity (the
+ * authentication key inside it is AES-256-GCM sealed, never plain text).
+ * `dds_statements`: one row per statement, summary columns plus the full record in `doc`.
+ */
+function ensureDdsSchema(): Promise<void> {
+  if (!ddsSchemaReady) {
+    ddsSchemaReady = getPool()
+      .query(`
+        CREATE TABLE IF NOT EXISTS dds_accounts (
+          user_uid          TEXT PRIMARY KEY,
+          user_email        TEXT,
+          identity          JSONB,
+          state_updated_ms  BIGINT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS dds_statements (
+          id                   TEXT PRIMARY KEY,
+          user_uid             TEXT NOT NULL REFERENCES dds_accounts (user_uid) ON DELETE CASCADE,
+          status               TEXT NOT NULL,
+          environment          TEXT NOT NULL,
+          internal_reference   TEXT,
+          euis_uuid            TEXT,
+          reference_number     TEXT,
+          verification_number  TEXT,
+          area_ha              DOUBLE PRECISION NOT NULL,
+          plot_count           INTEGER NOT NULL,
+          doc                  JSONB NOT NULL,
+          created_at           TIMESTAMPTZ NOT NULL,
+          updated_at           TIMESTAMPTZ NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS dds_statements_user_idx ON dds_statements (user_uid);
+        CREATE INDEX IF NOT EXISTS dds_statements_status_idx ON dds_statements (status);
+      `)
+      .then(() => undefined)
+      .catch((e) => {
+        ddsSchemaReady = null;
+        throw e;
+      });
+  }
+  return ddsSchemaReady;
+}
+
+export type DdsRowSource = {
+  id: string;
+  status: string;
+  environment: string;
+  internalReference?: string;
+  euis: { uuid?: string; referenceNumber?: string; verificationNumber?: string };
+  areaHa: number;
+  plots: unknown[];
+  createdAt: number;
+  updatedAt: number;
+};
+
+type DdsDbState<S> = { identity: unknown | null; statements: Record<string, S>; updatedAt: number };
+
+/** Mirror the user's DDS state in one transaction. */
+export async function writeDdsStateToDb<S extends DdsRowSource>(user: { uid: string; email: string }, state: DdsDbState<S>): Promise<void> {
+  await ensureDdsSchema();
+  const client = await getPool().connect();
+  const list = Object.values(state.statements);
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `INSERT INTO dds_accounts (user_uid, user_email, identity, state_updated_ms)
+       VALUES ($1, $2, $3::jsonb, $4)
+       ON CONFLICT (user_uid) DO UPDATE
+         SET user_email = EXCLUDED.user_email, identity = EXCLUDED.identity, state_updated_ms = EXCLUDED.state_updated_ms`,
+      [user.uid, user.email, state.identity ? JSON.stringify(state.identity) : null, state.updatedAt],
+    );
+    await client.query("DELETE FROM dds_statements WHERE user_uid = $1 AND NOT (id = ANY($2::text[]))", [user.uid, list.map((s) => s.id)]);
+    for (const s of list) {
+      await client.query(
+        `INSERT INTO dds_statements
+           (id, user_uid, status, environment, internal_reference, euis_uuid, reference_number, verification_number,
+            area_ha, plot_count, doc, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::jsonb, to_timestamp($12 / 1000.0), to_timestamp($13 / 1000.0))
+         ON CONFLICT (id) DO UPDATE SET
+           status = EXCLUDED.status, environment = EXCLUDED.environment, internal_reference = EXCLUDED.internal_reference,
+           euis_uuid = EXCLUDED.euis_uuid, reference_number = EXCLUDED.reference_number,
+           verification_number = EXCLUDED.verification_number, area_ha = EXCLUDED.area_ha,
+           plot_count = EXCLUDED.plot_count, doc = EXCLUDED.doc, updated_at = EXCLUDED.updated_at
+         WHERE dds_statements.user_uid = EXCLUDED.user_uid`,
+        [
+          s.id,
+          user.uid,
+          s.status,
+          s.environment,
+          s.internalReference ?? null,
+          s.euis.uuid ?? null,
+          s.euis.referenceNumber ?? null,
+          s.euis.verificationNumber ?? null,
+          s.areaHa,
+          s.plots.length,
+          JSON.stringify(s),
+          s.createdAt,
+          s.updatedAt,
+        ],
+      );
+    }
+    await client.query("COMMIT");
+  } catch (e) {
+    await client.query("ROLLBACK").catch(() => {});
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
+export async function readDdsStateFromDb(uid: string): Promise<{ identity: unknown | null; statements: unknown[]; updatedAt: number } | null> {
+  await ensureDdsSchema();
+  const head = await getPool().query("SELECT identity, state_updated_ms FROM dds_accounts WHERE user_uid = $1", [uid]);
+  if (!head.rowCount) return null;
+  const rows = await getPool().query("SELECT doc FROM dds_statements WHERE user_uid = $1 ORDER BY created_at", [uid]);
+  return { identity: head.rows[0].identity ?? null, statements: rows.rows.map((r) => r.doc), updatedAt: Number(head.rows[0].state_updated_ms) };
+}
