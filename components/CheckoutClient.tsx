@@ -8,9 +8,9 @@ import { usePlotStore } from "@/lib/plotStore";
 import { pricingTiers, type CurrencyKey } from "@/lib/data";
 
 type PlanId = "payg" | "regular" | "pro";
-type MethodId = "qris" | "va" | "ewallet" | "card" | "paypal";
-type Quote = { amount: string; currency: string; areaHa: number; count: number; quotaHa: number | null; exceedsQuota: boolean };
-type Subscription = { id: string; plan: string; status: string; active: boolean; expiresAt?: number; remainingHa: number };
+type MethodId = "duitku" | "card" | "paypal";
+type Quote = { amount: string; currency: "USD" | "IDR"; areaHa: number; count: number; quotaHa: number | null; exceedsQuota: boolean; minimumApplied: boolean };
+type Subscription = { id: string; plan: string; status: string; provider: "paypal" | "duitku"; active: boolean; expiresAt?: number; remainingHa: number };
 
 /** Display data per plan; prices come from the landing page tiers (lib/data.ts). */
 const PLANS: { id: PlanId; tier: (typeof pricingTiers)[number]; idrPerUnit: number }[] = [
@@ -19,11 +19,9 @@ const PLANS: { id: PlanId; tier: (typeof pricingTiers)[number]; idrPerUnit: numb
   { id: "pro", tier: pricingTiers[2], idrPerUnit: 1782000 },
 ];
 
-/** Local IDR methods need a payment gateway that isn't connected yet. */
-const METHODS: { id: MethodId; name: string; desc: string; soon?: boolean }[] = [
-  { id: "qris", name: "QRIS", desc: "Scan with any bank or e-wallet app", soon: true },
-  { id: "va", name: "Bank transfer (virtual account)", desc: "BCA, Mandiri, BNI, BRI, Permata", soon: true },
-  { id: "ewallet", name: "E-wallet", desc: "GoPay, OVO, DANA, ShopeePay", soon: true },
+/** Rupiah methods run on Duitku's hosted page, where the customer picks QRIS, a virtual account or an e-wallet. */
+const METHODS: { id: MethodId; name: string; desc: string }[] = [
+  { id: "duitku", name: "QRIS, bank transfer or e-wallet", desc: "Virtual accounts (BCA, Mandiri, BNI, BRI…), QRIS, OVO, DANA, ShopeePay — on Duitku's secure page" },
   { id: "card", name: "Credit or debit card", desc: "Visa, Mastercard, JCB — on PayPal's secure card form" },
   { id: "paypal", name: "PayPal", desc: "Pay with your PayPal balance or linked card" },
 ];
@@ -31,8 +29,12 @@ const METHODS: { id: MethodId; name: string; desc: string; soon?: boolean }[] = 
 const idr = (n: number) => "Rp" + Math.round(n).toLocaleString("id-ID");
 const area = (n: number) => (n >= 1 ? n.toFixed(2) : n.toFixed(4));
 
-function availability(method: (typeof METHODS)[number], cur: CurrencyKey, plan: PlanId): { ok: boolean; tag: string } {
-  if (method.soon) return { ok: false, tag: "Coming soon" };
+function availability(method: (typeof METHODS)[number], cur: CurrencyKey, plan: PlanId, duitku: boolean): { ok: boolean; tag: string } {
+  if (method.id === "duitku") {
+    if (!duitku) return { ok: false, tag: "Coming soon" };
+    if (cur !== "idr") return { ok: false, tag: "IDR only" };
+    return { ok: true, tag: plan === "payg" ? "" : "1 month" };
+  }
   if (cur === "idr") return { ok: false, tag: "USD only" };
   // PayPal subscriptions have no guest card form; monthly plans need a PayPal account.
   if (method.id === "card") return plan === "payg" ? { ok: true, tag: "" } : { ok: false, tag: "Pay as you go only" };
@@ -65,12 +67,14 @@ export default function CheckoutClient() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [environment, setEnvironment] = useState("");
+  const [duitku, setDuitku] = useState(false);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [cancelled, setCancelled] = useState(false);
   const geometry = JSON.stringify(plots.filter((p) => p.isValid).map((p) => ({ ring: p.ring })));
+  const currency = cur === "idr" ? "IDR" : "USD";
 
   const plan = PLANS.find((p) => p.id === planId)!;
-  const methods = METHODS.map((m) => ({ ...m, ...availability(m, cur, planId) }));
+  const methods = METHODS.map((m) => ({ ...m, ...availability(m, cur, planId, duitku) }));
   // Keep the chosen method valid when the plan or currency changes.
   const method = methods.find((m) => m.id === methodId && m.ok) ?? methods.find((m) => m.ok) ?? null;
 
@@ -79,6 +83,7 @@ export default function CheckoutClient() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
     setEnvironment(data.environment);
+    setDuitku(!!data.methods?.duitku);
     setSubscriptions(data.subscriptions);
   };
   useEffect(() => {
@@ -90,7 +95,7 @@ export default function CheckoutClient() {
     let current = true;
     setQuote(null);
     setError("");
-    paymentRequest({ action: "quote", plan: planId, plots: JSON.parse(geometry) })
+    paymentRequest({ action: "quote", plan: planId, plots: JSON.parse(geometry), currency })
       .then((data) => {
         if (current) setQuote(data);
       })
@@ -100,23 +105,32 @@ export default function CheckoutClient() {
     return () => {
       current = false;
     };
-  }, [planId, geometry]);
+  }, [planId, geometry, currency]);
 
   const pay = async () => {
     if (!quote || busy || !method) return;
-    const via = method.id === "card" ? "card" : "paypal";
+    const via = method.id;
     setBusy(true);
     setError("");
     try {
       // One request id per plan, method and quote: retries after a reload or an
-      // interrupted redirect reuse the same PayPal order instead of a new one.
-      const key = ["locanix.checkout", planId, via, quote.amount, geometry].join(".");
-      let requestId = sessionStorage.getItem(key);
-      if (!requestId) {
-        requestId = crypto.randomUUID();
-        sessionStorage.setItem(key, requestId);
+      // interrupted redirect reuse the same order instead of creating a new one.
+      const key = ["locanix.checkout", planId, via, quote.currency, quote.amount, geometry].join(".");
+      const create = (requestId: string) =>
+        paymentRequest({ action: "create", plan: planId, method: via, currency: quote.currency, plots: JSON.parse(geometry), amount: quote.amount, requestId });
+      const fresh = () => {
+        const id = crypto.randomUUID();
+        sessionStorage.setItem(key, id);
+        return id;
+      };
+      let data = await create(sessionStorage.getItem(key) ?? fresh());
+      // The earlier Duitku invoice for this order was cancelled or expired: start a new one.
+      if (data.expired) data = await create(fresh());
+      if (data.paid) {
+        sessionStorage.removeItem(key);
+        window.location.assign("/dashboard");
+        return;
       }
-      const data = await paymentRequest({ action: "create", plan: planId, method: via, plots: JSON.parse(geometry), amount: quote.amount, requestId });
       window.location.assign(data.approvalUrl);
     } catch (e) {
       setError((e as Error).message);
@@ -148,18 +162,19 @@ export default function CheckoutClient() {
     }
   };
 
-  const usdTotal = quote ? `$${quote.amount}` : "—";
-  const idrTotal = quote ? idr(planId === "payg" ? quote.areaHa * plan.idrPerUnit : plan.idrPerUnit) : "—";
-  const total = cur === "usd" ? usdTotal : idrTotal;
+  // The server quotes both currencies; the rupiah total is what Duitku charges.
+  const total = !quote || quote.currency !== currency ? "—" : quote.currency === "IDR" ? idr(Number(quote.amount)) : `$${quote.amount}`;
   const unitPrice = plan.tier[cur].amount;
   const line =
     planId === "payg"
       ? { label: quote ? `${area(quote.areaHa)} ha × ${unitPrice}` : `ha × ${unitPrice}`, value: total }
-      : { label: "First month", value: total };
+      : { label: cur === "idr" ? "One month" : "First month", value: total };
   const renewNote =
     planId === "payg"
       ? "One-time payment for this order."
-      : `Renews automatically at ${plan.tier.usd.amount}.00 USD each month until cancelled. Cancel here or in your PayPal account.`;
+      : cur === "idr"
+        ? "One month of access, paid once. It does not renew: buy the next month when this one ends."
+        : `Renews automatically at ${plan.tier.usd.amount}.00 USD each month until cancelled. Cancel here or in your PayPal account.`;
   const payLabel = busy
     ? "Please wait…"
     : !method
@@ -168,7 +183,17 @@ export default function CheckoutClient() {
         : "Choose a payment method"
       : method.id === "paypal"
         ? "Continue to PayPal"
-        : `Pay ${usdTotal} with card`;
+        : method.id === "duitku"
+          ? "Continue to Duitku"
+          : `Pay ${total} with card`;
+  const subscriptionStatus = (s: Subscription) =>
+    s.provider !== "duitku"
+      ? s.status.toLowerCase().replaceAll("_", " ")
+      : s.status === "SUCCESS"
+        ? s.active
+          ? "paid"
+          : "ended"
+        : "waiting for payment";
 
   return (
     <div className="min-h-screen bg-canvas leading-[normal] text-ink">
@@ -213,7 +238,7 @@ export default function CheckoutClient() {
 
         {environment === "sandbox" && (
           <p className="m-0 rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-[14px] text-amber-900">
-            Sandbox testing — use a PayPal Sandbox account. No real money is charged.
+            Sandbox testing — use a PayPal Sandbox account{duitku ? ", or Duitku's sandbox test payments for rupiah" : ""}. No real money is charged.
           </p>
         )}
         {cancelled && (
@@ -304,6 +329,12 @@ export default function CheckoutClient() {
                     QRIS, bank transfer and e-wallets are coming soon. Switch to USD to pay by card or PayPal now.
                   </p>
                 )}
+                {method?.id === "duitku" && (
+                  <p className={note}>
+                    You&apos;ll continue to Duitku&apos;s secure page to pay by QRIS, virtual account or e-wallet, then return to Locanix. Charged in rupiah.
+                    {planId !== "payg" && " This pays for one month and does not renew automatically."}
+                  </p>
+                )}
                 {method?.id === "card" && (
                   <p className={note}>
                     You&apos;ll enter your card on PayPal&apos;s secure card form — no PayPal account needed — then return to Locanix.
@@ -325,20 +356,21 @@ export default function CheckoutClient() {
                 {subscriptions.map((s) => (
                   <div key={s.id} className="border-t border-line-soft pt-3 text-[14px] text-ink-soft">
                     <p className="m-0 font-semibold text-ink capitalize">
-                      {s.plan} — {s.status.toLowerCase().replaceAll("_", " ")}
+                      {s.plan} — {subscriptionStatus(s)}
                     </p>
                     {s.active && (
                       <p className="m-0 mt-1">
                         {s.remainingHa.toFixed(2)} ha remaining. Paid access until {new Date(s.expiresAt!).toLocaleDateString()}.
+                        {s.provider === "duitku" && " Paid in rupiah for one month; it does not renew automatically."}
                       </p>
                     )}
                     <div className="mt-2 flex flex-wrap gap-4">
-                      {s.status === "APPROVAL_PENDING" && (
+                      {(s.status === "APPROVAL_PENDING" || (s.provider === "duitku" && s.status === "PENDING")) && (
                         <button type="button" disabled={busy} onClick={() => resume(s.id)} className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-ink underline">
-                          Resume checkout
+                          {s.provider === "duitku" ? "Continue payment" : "Resume checkout"}
                         </button>
                       )}
-                      {!["CANCELLED", "EXPIRED"].includes(s.status) && (
+                      {s.provider !== "duitku" && !["CANCELLED", "EXPIRED"].includes(s.status) && (
                         <button type="button" disabled={busy} onClick={() => cancel(s.id)} className="cursor-pointer border-0 bg-transparent p-0 font-semibold text-red-700 underline">
                           Cancel subscription
                         </button>
@@ -365,6 +397,9 @@ export default function CheckoutClient() {
                 </div>
               ))}
             </div>
+            {quote?.currency === "IDR" && quote.minimumApplied && cur === "idr" && (
+              <p className="m-0 text-[13px] leading-[1.5] text-muted">Rupiah payments have a minimum of Rp10.000, so this small order is charged Rp10.000.</p>
+            )}
             {quote?.exceedsQuota && (
               <p className="m-0 rounded-xl bg-review-bg p-3 text-[13px] leading-[1.5] text-review-ink">
                 Your selected plots ({quote.areaHa.toFixed(2)} ha) exceed this plan’s {quote.quotaHa} ha monthly quota, so they can’t all be analysed
@@ -379,7 +414,7 @@ export default function CheckoutClient() {
               </span>
             </div>
             <p className="-mt-2 mb-0 text-[13px] leading-[1.5] text-muted">
-              {cur === "idr" ? "Estimate in rupiah. IDR payment methods are coming soon." : renewNote}
+              {cur === "idr" && !duitku ? "Estimate in rupiah. IDR payment methods are coming soon." : renewNote}
             </p>
             {error && (
               <p role="alert" className="m-0 rounded-xl bg-red-50 p-3 text-[14px] text-red-700">

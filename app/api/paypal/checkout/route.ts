@@ -23,14 +23,16 @@ export async function POST(req: Request) {
     const raw = await req.text();
     if (raw.length > 1024 * 1024) throw new BillingError("Too many coordinates.", 413);
     const body = JSON.parse(raw);
-    if (body.action === "quote") return Response.json(quote(body.plan, body.plots));
+    if (body.action === "quote") return Response.json(quote(body.plan, body.plots, body.currency ?? "USD"));
     if (body.action === "create") return Response.json(await createCheckout(session.uid, body));
     if (body.action === "confirm" && typeof body.id === "string") return Response.json(await confirmCheckout(session.uid, body.id));
     if (body.action === "cancel" && typeof body.id === "string") return Response.json(await cancelSubscription(session.uid, body.id));
     if (body.action === "resume" && typeof body.id === "string") {
       return Response.json(await billingTransaction(state => {
         const p = state.purchases[body.id];
-        if (!p || p.uid !== session.uid || !p.approvalUrl || p.status !== "APPROVAL_PENDING") throw new BillingError("Pending subscription not found.", 404);
+        // A PayPal subscription awaiting approval, or a Duitku invoice not paid yet.
+        const pending = p?.provider === "duitku" ? p.status === "PENDING" : p?.status === "APPROVAL_PENDING";
+        if (!p || p.uid !== session.uid || !p.approvalUrl || !pending) throw new BillingError("Pending checkout not found.", 404);
         return { approvalUrl: p.approvalUrl };
       }));
     }

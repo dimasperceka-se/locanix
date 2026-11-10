@@ -37,6 +37,8 @@ See [`.env.example`](.env.example). The important ones:
 | `DATABASE_URL` | PostgreSQL: the upload log (`plots`) and each user's saved workspace with analysis results (`workspaces`, `workspace_plots`); tables are created on first use |
 | `ANALYSIS_API_BASE` | Root of the EUDR analysis API (see [`docs/FRONTEND-INTEGRATION.md`](docs/FRONTEND-INTEGRATION.md)) |
 | `PAYPAL_*` | PayPal app, plans and webhook; set up with [`scripts/setup-paypal.mjs`](scripts/setup-paypal.mjs) and [`scripts/PAYPAL-WEBHOOK.md`](scripts/PAYPAL-WEBHOOK.md) |
+| `DUITKU_ENV`, `DUITKU_MERCHANT_CODE`, `DUITKU_API_KEY` | Rupiah payments (QRIS, virtual accounts, e-wallets) on Duitku's hosted page. `DUITKU_ENV` is `sandbox` or `production` and must match `PAYPAL_ENV` (`sandbox` / `live`). The project's callback is `<APP_URL>/api/duitku/callback` |
+| `DUITKU_MOCK`, `DUITKU_BASE_URL` | Local only: send rupiah payments to the built-in mock Duitku (`/api/duitku-mock`) |
 | `SMTP_*` | Verification, password-reset and contact emails |
 | `LOCANIX_DATA_DIR` | Optional: folder for the file stores (default `.data`) |
 | `EUIS_CREDENTIAL_ENC_KEY` | Encrypts the EUIS authentication keys saved for DDS Submission (32 bytes, base64 or hex); required in production |

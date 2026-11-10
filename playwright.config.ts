@@ -44,6 +44,12 @@ export default defineConfig({
       EUIS_STATUS_FIRST_CHECK_SEC: "0",
       EUIS_STATUS_INTERVAL_SEC: "0",
       EUIS_RESOLVE_INTERVAL_SEC: "0",
+      // Rupiah payments go to the built-in mock Duitku, never to Duitku itself.
+      DUITKU_ENV: "sandbox",
+      DUITKU_MERCHANT_CODE: "DMOCK01",
+      DUITKU_API_KEY: "locanix-duitku-mock-key",
+      DUITKU_MOCK: "1",
+      DUITKU_BASE_URL: `${baseURL}/api/duitku-mock`,
     },
   },
 });

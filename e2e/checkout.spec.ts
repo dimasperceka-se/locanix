@@ -37,16 +37,18 @@ test("pay-as-you-go needs plots and is priced from their area", async ({ page, b
   expect(page.url()).toContain("sandbox.paypal.com");
 });
 
-test("IDR methods are coming soon; cards pay as you go through PayPal; monthly plans need a PayPal account", async ({ page, baseURL }) => {
+test("IDR pays through Duitku; cards pay as you go through PayPal; monthly plans need a PayPal account", async ({ page, baseURL }) => {
   await seedPlots(page, [SMALL_PLOT], baseURL!);
   await page.goto("/checkout");
   await expect(total(page, "$0.44 USD")).toBeVisible();
 
-  // Rupiah shows the price but cannot be paid yet.
+  // Rupiah goes to Duitku (the mock here); PayPal and cards stay in USD.
+  const rupiah = page.getByRole("radio", { name: /^QRIS, bank transfer or e-wallet/ });
+  await expect(rupiah).toContainText("IDR only");
   await page.getByRole("button", { name: "IDR" }).click();
-  await expect(page.getByRole("radio", { name: /^QRIS/ })).toHaveAttribute("aria-disabled", "true");
-  await expect(page.getByRole("radio", { name: /^QRIS/ })).toContainText("Coming soon");
-  await expect(page.getByRole("button", { name: "IDR payments coming soon" })).toBeDisabled();
+  await expect(rupiah).toHaveAttribute("aria-checked", "true");
+  await expect(page.getByRole("radio", { name: /^PayPal/ })).toContainText("USD only");
+  await expect(page.getByRole("button", { name: "Continue to Duitku" })).toBeEnabled();
   await page.getByRole("button", { name: "USD" }).click();
 
   await page.getByRole("radio", { name: /^Regular/ }).click();

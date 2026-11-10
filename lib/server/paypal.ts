@@ -8,6 +8,10 @@ export function paypalEnvironment() {
   return env;
 }
 
+export function paypalConfigured() {
+  return ["sandbox", "live"].includes(process.env.PAYPAL_ENV ?? "") && !!process.env.PAYPAL_CLIENT_ID && !!process.env.PAYPAL_CLIENT_SECRET;
+}
+
 function paypalBase() {
   return paypalEnvironment() === "sandbox" ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
 }
