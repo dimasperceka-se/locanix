@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { checkoutHref } from "@/lib/checkoutSelection";
 
 type Confirm = { paid: boolean; status: string; paymentUrl?: string };
 
@@ -11,6 +12,7 @@ export default function DuitkuReturn() {
   const [message, setMessage] = useState("Checking your payment with Duitku…");
   const [busy, setBusy] = useState(true);
   const [paymentUrl, setPaymentUrl] = useState("");
+  const [back, setBack] = useState("/checkout");
 
   const confirm = async () => {
     setBusy(true);
@@ -55,6 +57,7 @@ export default function DuitkuReturn() {
   };
 
   useEffect(() => {
+    setBack(checkoutHref());
     void confirm();
   }, []);
 
@@ -77,7 +80,7 @@ export default function DuitkuReturn() {
             </button>
           </div>
         )}
-        <Link href="/checkout" className="mt-5 block text-sm text-ink underline">
+        <Link href={back} className="mt-5 block text-sm text-ink underline">
           Return to checkout
         </Link>
       </section>

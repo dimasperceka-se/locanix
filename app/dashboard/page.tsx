@@ -363,7 +363,8 @@ export default function DashboardPage() {
               : `The checked plots need more than the ${quotaBlock.remainingHa.toFixed(2)} ha left of your free ${FREE_QUOTA_HA} ha allowance (plots you already analyzed don't count again). Uncheck some plots, or upgrade to analyze more.`
           }
           primaryLabel="View plans"
-          onPrimary={() => router.push("/checkout")}
+          // Checkout prices exactly the checked plots, not the whole workspace.
+          onPrimary={() => router.push(`/checkout?plots=${selected.map((p) => p.id).join(",")}`)}
           onClose={() => setQuotaBlock(null)}
         />
       )}

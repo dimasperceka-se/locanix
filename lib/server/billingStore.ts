@@ -41,6 +41,16 @@ export type BillingState = {
   free: Record<string, Record<string, number>>;
 };
 
+/** Read-only snapshot for quotes. The ledger is replaced atomically, so no lock is needed. */
+export async function readBillingState(): Promise<BillingState> {
+  try {
+    return JSON.parse(await readFile(path.join(dataDir("billing", billingEnvironment()), "ledger.json"), "utf8"));
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    return { purchases: {}, events: {}, free: {} };
+  }
+}
+
 // Local single-host storage. Cross-process lock + atomic replacement prevent lost
 // updates between callbacks, webhook deliveries and concurrent analysis requests.
 // Fail closed on corruption; never replace an unreadable ledger with an empty one.

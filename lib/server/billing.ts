@@ -1,5 +1,5 @@
 import { billedPlots } from "./billingGeometry";
-import { billingEnvironment, billingTransaction, type BillingState, type Purchase, type Plan, type BilledPlot, type PayMethod } from "./billingStore";
+import { billingEnvironment, billingTransaction, readBillingState, type BillingState, type Purchase, type Plan, type BilledPlot, type PayMethod } from "./billingStore";
 import { BillingError, paypal, paypalConfigured, paypalEnvironment } from "./paypal";
 import { createInvoice, duitkuConfigured, duitkuEnvironment, transactionStatus, verifyCallback } from "./duitku";
 import { findById } from "./userStore";
@@ -22,13 +22,37 @@ type Subscription = { id: string; status: string; custom_id?: string; plan_id: s
 type Sale = { id: string; status: string; time: string; amount_with_breakdown: { gross_amount: Money } };
 
 function isPlan(plan: unknown): plan is Plan { return plan === "payg" || plan === "regular" || plan === "pro"; }
-export function quote(plan: unknown, input: unknown, currency: unknown = "USD") {
+/**
+ * Plots the account may analyze again without paying: bought per hectare, analyzed
+ * on the free allowance, or already counted in an active monthly plan.
+ */
+function coveredKeys(state: BillingState, uid: string) {
+  const keys = new Set(Object.keys(state.free[uid] || {}));
+  for (const p of Object.values(state.purchases)) {
+    if (p.uid !== uid || !purchaseActive(p)) continue;
+    if (p.plan === "payg") for (const plot of p.plots) keys.add(plot.key);
+    else for (const key of Object.keys(p.used)) keys.add(key);
+  }
+  return keys;
+}
+
+/** With a user, plots they are already covered for are left out (and counted in `skipped`). */
+export async function quote(plan: unknown, input: unknown, currency: unknown = "USD", uid?: string) {
   if (!isPlan(plan)) throw new BillingError("Choose a valid plan.");
   if (currency !== "USD" && currency !== "IDR") throw new BillingError("Choose USD or IDR.");
   if (currency === "USD" && (process.env.PAYPAL_CURRENCY || "USD") !== "USD") throw new BillingError("Only USD pricing is configured.", 503);
-  const plots = Array.isArray(input) && input.length ? billedPlots(input) : [];
+  let plots = Array.isArray(input) && input.length ? billedPlots(input) : [];
+  let skipped = 0;
+  if (uid && plots.length) {
+    const covered = coveredKeys(await readBillingState(), uid);
+    const billable = plots.filter(p => !covered.has(p.key));
+    skipped = plots.length - billable.length;
+    plots = billable;
+  }
   const areaHa = plots.reduce((sum, p) => sum + p.areaHa, 0);
-  if (plan === "payg" && !plots.length) throw new BillingError("Add valid plots before paying per hectare.");
+  if (plan === "payg" && !plots.length) {
+    throw new BillingError(skipped ? "The selected plots are already paid for or covered by your free allowance. Run the analysis from Plots." : "Add valid plots before paying per hectare.");
+  }
   // A subscription is a monthly allowance, not a purchase of these plots: selecting more
   // than the quota only warns; analysis enforces the quota per plot later.
   const quotaHa = plan === "payg" ? null : QUOTAS[plan];
@@ -40,7 +64,7 @@ export function quote(plan: unknown, input: unknown, currency: unknown = "USD") 
     minimumApplied = raw < IDR_MINIMUM;
     amount = String(Math.max(IDR_MINIMUM, raw));
   }
-  return { plan, plots, areaHa, amount, currency, count: plots.length, quotaHa, exceedsQuota: quotaHa !== null && areaHa > quotaHa + 1e-8, minimumApplied };
+  return { plan, plots, areaHa, amount, currency, count: plots.length, skipped, quotaHa, exceedsQuota: quotaHa !== null && areaHa > quotaHa + 1e-8, minimumApplied };
 }
 
 export function purchaseActive(p: Purchase, now = Date.now()): boolean {
@@ -82,7 +106,7 @@ function blocksNewPlan(p: Purchase, now: number) {
 }
 
 export async function createCheckout(uid: string, input: { plan?: unknown; plots?: unknown; amount?: unknown; requestId?: unknown; method?: unknown; currency?: unknown }) {
-  const q = quote(input.plan, input.plots, input.currency ?? "USD");
+  const q = await quote(input.plan, input.plots, input.currency ?? "USD", uid);
   if (q.amount !== input.amount) throw new BillingError("The quote changed. Please refresh and check the total.", 409);
   const method: PayMethod = input.method === "duitku" ? "duitku" : input.method === "card" ? "card" : "paypal";
   if (method === "duitku" && q.currency !== "IDR") throw new BillingError("QRIS, bank transfer and e-wallets are charged in rupiah. Switch to IDR.");

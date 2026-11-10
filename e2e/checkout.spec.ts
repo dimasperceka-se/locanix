@@ -37,6 +37,29 @@ test("pay-as-you-go needs plots and is priced from their area", async ({ page, b
   expect(page.url()).toContain("sandbox.paypal.com");
 });
 
+test("View plans after an over-quota run prices only the plots that were checked", async ({ page, baseURL }) => {
+  const { version } = await (await page.request.get("/api/consent")).json();
+  expect((await page.request.post("/api/consent", { data: { version } })).ok()).toBeTruthy();
+  await seedPlots(page, [SMALL_PLOT, LARGE_PLOT], baseURL!);
+  const quote = await (await page.request.post("/api/paypal/checkout", { data: { action: "quote", plan: "payg", plots: [{ ring: LARGE_PLOT }] } })).json();
+
+  await page.goto("/dashboard");
+  await page.getByLabel("Select plot 1", { exact: true }).uncheck();
+  await page.getByRole("button", { name: "Run EUDR analysis" }).click();
+  await page.getByRole("button", { name: "View plans" }).click();
+  await expect(page).toHaveURL(/\/checkout\?plots=2$/);
+  await expect(page.getByText(/Only the plots you checked on Plots/)).toBeVisible();
+  await expect(total(page, `$${quote.amount} USD`)).toBeVisible();
+
+  // Coming back from PayPal's cancel link keeps that selection.
+  await page.goto("/checkout?cancelled=1");
+  await expect(total(page, `$${quote.amount} USD`)).toBeVisible();
+  // Billing from the menu, with no selection, prices every valid plot.
+  await page.goto("/checkout");
+  await expect(page.getByText(/Only the plots you checked/)).toHaveCount(0);
+  await expect(total(page, `$${quote.amount} USD`)).toHaveCount(0);
+});
+
 test("IDR pays through Duitku; cards pay as you go through PayPal; monthly plans need a PayPal account", async ({ page, baseURL }) => {
   await seedPlots(page, [SMALL_PLOT], baseURL!);
   await page.goto("/checkout");

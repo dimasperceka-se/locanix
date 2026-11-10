@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     const raw = await req.text();
     if (raw.length > 1024 * 1024) throw new BillingError("Too many coordinates.", 413);
     const body = JSON.parse(raw);
-    if (body.action === "quote") return Response.json(quote(body.plan, body.plots, body.currency ?? "USD"));
+    if (body.action === "quote") return Response.json(await quote(body.plan, body.plots, body.currency ?? "USD", session.uid));
     if (body.action === "create") return Response.json(await createCheckout(session.uid, body));
     if (body.action === "confirm" && typeof body.id === "string") return Response.json(await confirmCheckout(session.uid, body.id));
     if (body.action === "cancel" && typeof body.id === "string") return Response.json(await cancelSubscription(session.uid, body.id));

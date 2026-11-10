@@ -52,6 +52,24 @@ test("pay as you go in rupiah: Rp10.000 minimum, Duitku's page, and the callback
   expect(invoice).toMatchObject({ amount: 10000, status: "00", callbackStatus: 200 });
 });
 
+test("plots already paid for are not charged again", async ({ page, baseURL }) => {
+  await seedPlots(page, [SMALL_PLOT], baseURL!);
+  await page.goto("/checkout");
+  await page.getByRole("button", { name: "IDR" }).click();
+  await toDuitku(page);
+  await page.getByRole("button", { name: "Pay", exact: true }).click();
+  await page.waitForURL(/\/dashboard$/);
+
+  const quote = async (rings: [number, number][][]) =>
+    page.request.post("/api/paypal/checkout", { data: { action: "quote", plan: "payg", currency: "USD", plots: rings.map((ring) => ({ ring })) } });
+  const both = await (await quote([SMALL_PLOT, LARGE_PLOT])).json();
+  const large = await (await quote([LARGE_PLOT])).json();
+  expect(both).toMatchObject({ count: 1, skipped: 1, amount: large.amount });
+  const paidOnly = await quote([SMALL_PLOT]);
+  expect(paidOnly.status()).toBe(400);
+  expect((await paidOnly.json()).error).toMatch(/already paid for/);
+});
+
 test("a rupiah monthly plan is one month, has nothing to cancel, and blocks a second plan", async ({ page }) => {
   await page.goto("/checkout");
   await page.getByRole("button", { name: "IDR" }).click();

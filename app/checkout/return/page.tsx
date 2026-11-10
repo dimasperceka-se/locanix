@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { checkoutHref } from "@/lib/checkoutSelection";
 
 // PayPal activates subscriptions (and records their first payment) asynchronously.
 const SETTLING = ["APPROVED", "ACTIVE", "PENDING", "UNVERIFIED"];
@@ -9,6 +10,7 @@ const SETTLING = ["APPROVED", "ACTIVE", "PENDING", "UNVERIFIED"];
 export default function PaymentReturn() {
   const [message, setMessage] = useState("Checking your payment with PayPal…");
   const [busy, setBusy] = useState(true);
+  const [back, setBack] = useState("/checkout");
   const confirm = async () => {
     setBusy(true);
     try {
@@ -34,13 +36,13 @@ export default function PaymentReturn() {
     } catch (e) { setMessage((e as Error).message); }
     setBusy(false);
   };
-  useEffect(() => { void confirm(); }, []);
+  useEffect(() => { setBack(checkoutHref()); void confirm(); }, []);
   return <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
     <section className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-sm">
       <h1 className="text-2xl font-bold text-ink">PayPal payment</h1>
       <p role="status" className="mt-4 text-slate-600">{message}</p>
       {!busy && <button onClick={confirm} className="mt-6 rounded-lg bg-ink px-5 py-3 font-semibold text-white">Check payment again</button>}
-      <Link href="/checkout" className="mt-5 block text-sm text-ink underline">Return to checkout</Link>
+      <Link href={back} className="mt-5 block text-sm text-ink underline">Return to checkout</Link>
     </section>
   </main>;
 }

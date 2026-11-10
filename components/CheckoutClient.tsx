@@ -6,11 +6,11 @@ import { LogoMark } from "@/components/Logo";
 import { ui } from "@/components/workspace/ui";
 import { usePlotStore } from "@/lib/plotStore";
 import { pricingTiers, type CurrencyKey } from "@/lib/data";
+import { SELECTION_KEY } from "@/lib/checkoutSelection";
 
 type PlanId = "payg" | "regular" | "pro";
 type MethodId = "duitku" | "card" | "paypal";
-type Quote = { amount: string; currency: "USD" | "IDR"; areaHa: number; count: number; quotaHa: number | null; exceedsQuota: boolean; minimumApplied: boolean };
-type Subscription = { id: string; plan: string; status: string; provider: "paypal" | "duitku"; active: boolean; expiresAt?: number; remainingHa: number };
+type Quote = { amount: string; currency: "USD" | "IDR"; areaHa: number; count: number; skipped: number; quotaHa: number | null; exceedsQuota: boolean; minimumApplied: boolean };type Subscription = { id: string; plan: string; status: string; provider: "paypal" | "duitku"; active: boolean; expiresAt?: number; remainingHa: number };
 
 /** Display data per plan; prices come from the landing page tiers (lib/data.ts). */
 const PLANS: { id: PlanId; tier: (typeof pricingTiers)[number]; idrPerUnit: number }[] = [
@@ -58,8 +58,9 @@ const sectionH2 = "m-0 font-display text-[20px] font-semibold";
 const stepNo = "mr-2.5 font-mono text-[13px] font-normal text-muted";
 const note = "m-0 text-[14px] leading-[1.6] text-[#3A403C]";
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ selectedIds = null }: { selectedIds?: number[] | null }) {
   const { plots, loadWorkspace } = usePlotStore();
+  const [chosenIds, setChosenIds] = useState<number[] | null>(selectedIds);
   const [cur, setCur] = useState<CurrencyKey>("usd");
   const [planId, setPlanId] = useState<PlanId>("payg");
   const [methodId, setMethodId] = useState<MethodId>("card");
@@ -70,7 +71,9 @@ export default function CheckoutClient() {
   const [duitku, setDuitku] = useState(false);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [cancelled, setCancelled] = useState(false);
-  const geometry = JSON.stringify(plots.filter((p) => p.isValid).map((p) => ({ ring: p.ring })));
+  // Only the plots checked on Plots when there is a selection; otherwise every valid plot.
+  const only = chosenIds ? new Set(chosenIds) : null;
+  const geometry = JSON.stringify(plots.filter((p) => p.isValid && (!only || only.has(p.id))).map((p) => ({ ring: p.ring })));
   const currency = cur === "idr" ? "IDR" : "USD";
 
   const plan = PLANS.find((p) => p.id === planId)!;
@@ -88,7 +91,18 @@ export default function CheckoutClient() {
   };
   useEffect(() => {
     void loadWorkspace();
-    setCancelled(new URLSearchParams(window.location.search).has("cancelled"));
+    const back = new URLSearchParams(window.location.search).has("cancelled");
+    setCancelled(back);
+    try {
+      if (selectedIds) sessionStorage.setItem(SELECTION_KEY, selectedIds.join(","));
+      else if (back) {
+        // PayPal's cancel link has no selection: restore the one this checkout started with.
+        const saved = sessionStorage.getItem(SELECTION_KEY)?.split(",").map(Number).filter((n) => n > 0);
+        if (saved?.length) setChosenIds(saved);
+      } else sessionStorage.removeItem(SELECTION_KEY);
+    } catch {
+      /* storage unavailable: the selection just isn't remembered */
+    }
     refreshBilling().catch((e) => setError(e.message));
   }, []);
   useEffect(() => {
@@ -397,6 +411,18 @@ export default function CheckoutClient() {
                 </div>
               ))}
             </div>
+            {(chosenIds || !!quote?.skipped) && (
+              <p className="m-0 text-[13px] leading-[1.5] text-muted">
+                {chosenIds && "Only the plots you checked on Plots. "}
+                {!!quote?.skipped &&
+                  `${quote.skipped} of them ${quote.skipped === 1 ? "is" : "are"} already paid for or covered by your free allowance, so ${quote.skipped === 1 ? "it isn’t" : "they aren’t"} charged again. `}
+                {chosenIds && (
+                  <Link href="/dashboard" className="text-muted underline">
+                    Change selection
+                  </Link>
+                )}
+              </p>
+            )}
             {quote?.currency === "IDR" && quote.minimumApplied && cur === "idr" && (
               <p className="m-0 text-[13px] leading-[1.5] text-muted">Rupiah payments have a minimum of Rp10.000, so this small order is charged Rp10.000.</p>
             )}
